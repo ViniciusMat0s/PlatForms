@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
+import DashboardPanel from './components/DashboardPanel';
 import LoginPanel from './components/LoginPanel';
-import QuestionnaireFilters from './components/QuestionnaireFilters';
 import QuestionnaireCard from './components/QuestionnaireCard';
 import QuestionnaireEditor from './components/QuestionnaireEditor';
+import QuestionnaireFilters from './components/QuestionnaireFilters';
 import QuestionnaireRunner from './components/QuestionnaireRunner';
 import ResultsPanel from './components/ResultsPanel';
 import Sidebar from './components/Sidebar';
@@ -74,15 +75,6 @@ export default function App() {
     [questionnaires, selectedQuestionnaireId],
   );
 
-  const dashboardStats = useMemo(
-    () => ({
-      questionnaireCount: questionnaires.length,
-      responseCount: responses.length,
-      selectedCount: selectedQuestionnaire?.questions.length ?? 0,
-    }),
-    [questionnaires.length, responses.length, selectedQuestionnaire],
-  );
-
   const questionnaireDomains = useMemo(() => {
     return Array.from(new Set(questionnaires.map((questionnaire) => questionnaire.domain).filter(Boolean))).sort(
       (a, b) => a.localeCompare(b),
@@ -107,11 +99,8 @@ export default function App() {
           .filter(Boolean)
           .some((value) => String(value).toLowerCase().includes(query));
 
-      const matchesDomain =
-        questionnaireDomain === 'all' || questionnaire.domain === questionnaireDomain;
-
-      const matchesStatus =
-        questionnaireStatus === 'all' || questionnaire.status === questionnaireStatus;
+      const matchesDomain = questionnaireDomain === 'all' || questionnaire.domain === questionnaireDomain;
+      const matchesStatus = questionnaireStatus === 'all' || questionnaire.status === questionnaireStatus;
 
       return matchesQuery && matchesDomain && matchesStatus;
     });
@@ -252,11 +241,7 @@ export default function App() {
       );
       setQuestionnaires(resolvedQuestionnaires);
       saveState(QUESTIONNAIRES_KEY, resolvedQuestionnaires);
-      if (authStatus === 'signed_in') {
-        setSyncStatus('Online');
-      } else {
-        setSyncStatus('Offline');
-      }
+      setSyncStatus(authStatus === 'signed_in' ? 'Online' : 'Offline');
     } catch {
       setQuestionnaires(nextQuestionnaires);
       saveState(QUESTIONNAIRES_KEY, nextQuestionnaires);
@@ -370,107 +355,26 @@ export default function App() {
         onChangeView={setActiveView}
         onLogout={handleLogout}
         currentUser={currentUser}
-        questionnaireCount={dashboardStats.questionnaireCount}
-        responseCount={dashboardStats.responseCount}
+        questionnaireCount={questionnaires.length}
+        responseCount={responses.length}
         syncStatus={syncStatus}
       />
 
       <main className="main-content">
-        <header className="hero">
-          <div>
-            <span className="eyebrow">Plataforma de formulários</span>
-            <h1>Base pronta para cadastrar, responder e analisar questionários.</h1>
-            <p>
-              Começamos com uma fundação genérica, pensada para acomodar as escalas do
-              levantamento e crescer para painel, relatórios e automações depois.
-            </p>
-          </div>
-          <div className="hero-stack">
-            <div className="hero-card">
-              <span>Usuário</span>
-              <strong>
-                {currentUser ? `${currentUser.name} · ${currentUser.role}` : 'Desconhecido'}
-              </strong>
-            </div>
-            <div className="hero-card accent">
-              <span>Questionário selecionado</span>
-              <strong>{selectedQuestionnaire?.title ?? 'Nenhum'}</strong>
-            </div>
-            <div className="hero-card">
-              <span>Sincronização</span>
-              <strong>{syncStatus}</strong>
-            </div>
-          </div>
-        </header>
-
         {activeView === 'dashboard' && (
-          <section className="dashboard-grid">
-            <article className="panel">
-              <div className="panel-header">
-                <div>
-                  <span className="eyebrow">Resumo</span>
-                  <h2>Visão geral</h2>
-                </div>
-                <button
-                  className="primary-button"
-                  onClick={createQuestionnaire}
-                  type="button"
-                  disabled={!canManageContent}
-                  title={canManageContent ? 'Criar questionário' : 'Seu perfil não permite criar questionários'}
-                >
-                  Novo questionário
-                </button>
-              </div>
-
-              <div className="metrics-grid">
-                <article className="metric-card">
-                  <span>Questionários</span>
-                  <strong>{dashboardStats.questionnaireCount}</strong>
-                </article>
-                <article className="metric-card">
-                  <span>Respostas</span>
-                  <strong>{dashboardStats.responseCount}</strong>
-                </article>
-                <article className="metric-card">
-                  <span>Estado</span>
-                  <strong>{syncStatus}</strong>
-                </article>
-              </div>
-
-              <div className="section-title">
-                <h3>Biblioteca inicial</h3>
-                <p>
-                  {filteredQuestionnaires.length} de {questionnaires.length} questionários visíveis.
-                </p>
-              </div>
-
-              <QuestionnaireFilters
-                query={questionnaireQuery}
-                domain={questionnaireDomain}
-                status={questionnaireStatus}
-                domains={questionnaireDomains}
-                onChange={updateFilters}
-                onClear={clearFilters}
-              />
-
-              <div className="cards-grid">
-                {filteredQuestionnaires.length === 0 ? (
-                  <div className="empty-state">Nenhum questionário encontrado com esses filtros.</div>
-                ) : (
-                  filteredQuestionnaires.map((questionnaire) => (
-                    <QuestionnaireCard
-                      key={questionnaire.id}
-                      questionnaire={questionnaire}
-                      isSelected={questionnaire.id === selectedQuestionnaireId}
-                      onSelect={setSelectedQuestionnaireId}
-                    />
-                  ))
-                )}
-              </div>
-            </article>
-
-            <ResultsPanel questionnaires={questionnaires} responses={responses} />
-          </section>
+          <DashboardPanel
+            currentUser={currentUser}
+            questionnaires={questionnaires}
+            responses={responses}
+            selectedQuestionnaire={selectedQuestionnaire}
+            selectedQuestionnaireId={selectedQuestionnaireId}
+            query={questionnaireQuery}
+            onQueryChange={setQuestionnaireQuery}
+            onSelectQuestionnaire={setSelectedQuestionnaireId}
+            onCreateQuestionnaire={createQuestionnaire}
+            onOpenView={setActiveView}
+            canManageContent={canManageContent}
+          />
         )}
 
         {activeView === 'biblioteca' && (
@@ -534,9 +438,7 @@ export default function App() {
           />
         )}
 
-        {activeView === 'resultados' && (
-          <ResultsPanel questionnaires={questionnaires} responses={responses} />
-        )}
+        {activeView === 'resultados' && <ResultsPanel questionnaires={questionnaires} responses={responses} />}
       </main>
     </div>
   );

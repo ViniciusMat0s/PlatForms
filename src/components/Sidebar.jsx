@@ -1,10 +1,22 @@
+import Icon from './Icon';
+
 const navigation = [
-  { id: 'dashboard', label: 'Painel' },
-  { id: 'biblioteca', label: 'Biblioteca' },
-  { id: 'construtor', label: 'Construtor' },
-  { id: 'responder', label: 'Responder' },
-  { id: 'resultados', label: 'Resultados' },
+  { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
+  { id: 'biblioteca', label: 'Biblioteca', icon: 'library' },
+  { id: 'construtor', label: 'Construtor', icon: 'builder' },
+  { id: 'responder', label: 'Responder', icon: 'runner' },
+  { id: 'resultados', label: 'Resultados', icon: 'results' },
 ];
+
+function getInitials(name) {
+  if (!name) return 'FP';
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('');
+}
 
 export default function Sidebar({
   activeView,
@@ -17,12 +29,12 @@ export default function Sidebar({
 }) {
   return (
     <aside className="sidebar">
-      <div>
+      <div className="sidebar-top">
         <div className="brand">
-          <span className="brand-mark">F</span>
+          <span className="brand-mark">FP</span>
           <div>
             <strong>Forms Platform</strong>
-            <small>Base do projeto</small>
+            <small>Questionários e relatórios</small>
           </div>
         </div>
 
@@ -34,30 +46,41 @@ export default function Sidebar({
               onClick={() => onChangeView(item.id)}
               type="button"
             >
-              {item.label}
+              <span className="nav-icon">
+                <Icon name={item.icon} size={16} />
+              </span>
+              <span className="nav-label">{item.label}</span>
             </button>
           ))}
         </nav>
       </div>
 
       <div className="sidebar-footer">
-        <div className="stat-pill">
-          <span>Usuário</span>
-          <strong>{currentUser ? `${currentUser.name} · ${currentUser.role}` : 'Sem sessão'}</strong>
+        <div className="profile-panel">
+          <span className="profile-avatar">{getInitials(currentUser?.name)}</span>
+          <div>
+            <strong>{currentUser ? currentUser.name : 'Sem sessão'}</strong>
+            <span>{currentUser ? currentUser.role : 'Desconectado'}</span>
+          </div>
         </div>
-        <div className="stat-pill">
-          <span>Questionários</span>
-          <strong>{questionnaireCount}</strong>
+
+        <div className="stat-grid">
+          <div className="stat-pill">
+            <span>Questionários</span>
+            <strong>{questionnaireCount}</strong>
+          </div>
+          <div className="stat-pill">
+            <span>Respostas</span>
+            <strong>{responseCount}</strong>
+          </div>
+          <div className="stat-pill">
+            <span>Sincronização</span>
+            <strong>{syncStatus}</strong>
+          </div>
         </div>
-        <div className="stat-pill">
-          <span>Respostas</span>
-          <strong>{responseCount}</strong>
-        </div>
-        <div className="stat-pill">
-          <span>Sincronização</span>
-          <strong>{syncStatus}</strong>
-        </div>
-        <button className="ghost-button" onClick={onLogout} type="button">
+
+        <button className="ghost-button logout-button" onClick={onLogout} type="button">
+          <Icon name="logout" size={16} />
           Sair
         </button>
       </div>
