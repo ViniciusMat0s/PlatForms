@@ -22,7 +22,6 @@ export default function LoginPanel({ onLogin, onPublicAccess, loading, error }) 
         <article className="login-card">
           <span className="eyebrow">Acesso do administrador</span>
           <h1>Entrar para gerenciar os formulários</h1>
-          <p>Use sua conta de administrador para criar, acompanhar e exportar os resultados.</p>
 
           <form className="login-form" onSubmit={handleAdminSubmit}>
             <label className="field">
@@ -67,10 +66,6 @@ export default function LoginPanel({ onLogin, onPublicAccess, loading, error }) 
             </button>
           </form>
 
-          <div className="login-hint">
-            <strong>Administrador de teste</strong>
-            <span>ronice / roniceadmin</span>
-          </div>
         </article>
       </div>
     </section>
