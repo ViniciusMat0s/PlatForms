@@ -66,6 +66,7 @@ export default function ResultsPanel({ questionnaires, responses }) {
               <tr>
                 <th>Formulário</th>
                 <th>Pessoa</th>
+                <th>Setor</th>
                 <th>Pontuação</th>
                 <th>Faixa</th>
                 <th>Data</th>
@@ -74,7 +75,7 @@ export default function ResultsPanel({ questionnaires, responses }) {
             <tbody>
               {recent.length === 0 ? (
                 <tr>
-                  <td colSpan={5}>
+                  <td colSpan={6}>
                     <div className="empty-state small">Nenhuma resposta registrada.</div>
                   </td>
                 </tr>
@@ -88,6 +89,7 @@ export default function ResultsPanel({ questionnaires, responses }) {
                         <span>{questionnaire?.domain ?? 'Sem categoria'}</span>
                       </td>
                       <td>{response.respondentName || 'Sem nome'}</td>
+                      <td>{response.sector || 'Sem setor'}</td>
                       <td>{response.score}</td>
                       <td>{response.band}</td>
                       <td>{formatDate(response.createdAt)}</td>

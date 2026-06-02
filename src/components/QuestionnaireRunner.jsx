@@ -1,11 +1,23 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { scoreQuestionnaire } from '../lib/scoring';
 
-export default function QuestionnaireRunner({ questionnaire, onSubmit }) {
-  const [respondentName, setRespondentName] = useState('');
-  const [unit, setUnit] = useState('');
+export default function QuestionnaireRunner({
+  questionnaire,
+  onSubmit,
+  initialRespondentName = '',
+  initialSector = '',
+}) {
+  const [respondentName, setRespondentName] = useState(initialRespondentName);
+  const [sector, setSector] = useState(initialSector);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    setRespondentName(initialRespondentName);
+    setSector(initialSector);
+    setAnswers({});
+    setSubmitted(false);
+  }, [questionnaire?.id, initialRespondentName, initialSector]);
 
   const result = useMemo(
     () =>
@@ -33,7 +45,7 @@ export default function QuestionnaireRunner({ questionnaire, onSubmit }) {
     await onSubmit({
       questionnaireId: questionnaire.id,
       respondentName,
-      unit,
+      sector,
       notes: '',
       answers,
       score: result.score,
@@ -63,11 +75,11 @@ export default function QuestionnaireRunner({ questionnaire, onSubmit }) {
       <div className="editor-grid runner-info-grid">
         <label className="field">
           <span>Seu nome</span>
-          <input value={respondentName} onChange={(event) => setRespondentName(event.target.value)} />
+          <input required value={respondentName} onChange={(event) => setRespondentName(event.target.value)} />
         </label>
         <label className="field">
-          <span>Unidade / setor</span>
-          <input value={unit} onChange={(event) => setUnit(event.target.value)} />
+          <span>Setor</span>
+          <input required value={sector} onChange={(event) => setSector(event.target.value)} />
         </label>
       </div>
 

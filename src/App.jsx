@@ -81,10 +81,21 @@ export default function App() {
   };
 
   const hydrateState = async (role = currentUser?.role) => {
+    if (role !== 'admin') {
+      const formId = pendingFormId || new URLSearchParams(window.location.search).get('form') || '';
+      setQuestionnaires(seedQuestionnaires);
+      setResponses([]);
+      setSelectedQuestionnaireId(
+        formId && allowedQuestionnaireIds.has(formId) ? formId : seedQuestionnaires[0]?.id ?? null,
+      );
+      setSyncStatus('Acesso livre');
+      return;
+    }
+
     try {
       const state = await getState();
       const nextQuestionnaires = state.questionnaires?.length ? state.questionnaires : seedQuestionnaires;
-      const nextResponses = role === 'admin' ? state.responses ?? [] : [];
+      const nextResponses = state.responses ?? [];
       applyState(nextQuestionnaires, nextResponses);
       const formId = pendingFormId || new URLSearchParams(window.location.search).get('form') || '';
       if (formId && filterAllowedQuestionnaires(nextQuestionnaires).some((item) => item.id === formId)) {
@@ -93,7 +104,7 @@ export default function App() {
       setSyncStatus('Online');
     } catch {
       const cachedQuestionnaires = loadState(QUESTIONNAIRES_KEY, seedQuestionnaires);
-      const cachedResponses = role === 'admin' ? loadState(RESPONSES_KEY, []) : [];
+      const cachedResponses = loadState(RESPONSES_KEY, []);
       applyState(cachedQuestionnaires, cachedResponses);
       const formId = pendingFormId || new URLSearchParams(window.location.search).get('form') || '';
       if (formId && filterAllowedQuestionnaires(cachedQuestionnaires).some((item) => item.id === formId)) {
@@ -162,7 +173,7 @@ export default function App() {
         : ['biblioteca', 'responder'];
 
     if (!allowedViews.includes(activeView)) {
-      setActiveView(currentUser.role === 'leitor' ? 'biblioteca' : getDefaultViewForRole(currentUser.role));
+      setActiveView(getDefaultViewForRole(currentUser.role));
     }
   }, [activeView, currentUser, questionnaires]);
 
@@ -175,7 +186,7 @@ export default function App() {
       setCurrentUser(data.user);
       setAuthStatus('signed_in');
       await hydrateState(data.user.role);
-      setActiveView(data.user.role === 'leitor' ? 'biblioteca' : getDefaultViewForRole(data.user.role));
+      setActiveView(getDefaultViewForRole(data.user.role));
     } catch (error) {
       setAuthError(error.message || 'Falha ao entrar.');
     } finally {
@@ -183,9 +194,34 @@ export default function App() {
     }
   };
 
+  const handlePublicAccess = async ({ name, sector }) => {
+    const cleanName = name.trim();
+    const cleanSector = sector.trim();
+
+    if (!cleanName || !cleanSector) {
+      setAuthError('Informe seu nome e seu setor para continuar.');
+      return;
+    }
+
+    setAuthError('');
+    const publicUser = {
+      id: `public-${Date.now()}`,
+      name: cleanName,
+      sector: cleanSector,
+      role: 'public',
+    };
+
+    setCurrentUser(publicUser);
+    setAuthStatus('public');
+    await hydrateState('public');
+    setActiveView('biblioteca');
+  };
+
   const handleLogout = async () => {
     try {
-      await apiLogout();
+      if (currentUser?.role === 'admin') {
+        await apiLogout();
+      }
     } finally {
       setCurrentUser(null);
       setAuthStatus('signed_out');
@@ -200,20 +236,13 @@ export default function App() {
 
   const handleResponseSubmit = async (payload) => {
     try {
-      const created =
-        authStatus === 'signed_in'
-          ? await apiCreateResponse(payload)
-          : {
-              id: `resp-${Date.now()}`,
-              createdAt: new Date().toISOString(),
-              ...payload,
-            };
+      const created = await apiCreateResponse(payload);
 
       const next = [created, ...responses];
       setResponses(next);
       saveState(RESPONSES_KEY, next);
-      setActiveView('resultados');
-      setSyncStatus(authStatus === 'signed_in' ? 'Online' : 'Offline');
+      setActiveView(currentUser?.role === 'admin' ? 'resultados' : 'biblioteca');
+      setSyncStatus('Online');
     } catch {
       const fallback = {
         id: `resp-${Date.now()}`,
@@ -223,7 +252,7 @@ export default function App() {
       const next = [fallback, ...responses];
       setResponses(next);
       saveState(RESPONSES_KEY, next);
-      setActiveView('resultados');
+      setActiveView(currentUser?.role === 'admin' ? 'resultados' : 'biblioteca');
       setSyncStatus('Offline');
     }
   };
@@ -248,7 +277,14 @@ export default function App() {
   }
 
   if (authStatus === 'signed_out') {
-    return <LoginPanel onLogin={handleLogin} loading={authLoading} error={authError} />;
+    return (
+      <LoginPanel
+        onLogin={handleLogin}
+        onPublicAccess={handlePublicAccess}
+        loading={authLoading}
+        error={authError}
+      />
+    );
   }
 
   return (
@@ -266,7 +302,7 @@ export default function App() {
       />
 
       <main className="main-content">
-        {currentUser?.role === 'leitor' && activeView === 'biblioteca' && (
+        {currentUser?.role !== 'admin' && activeView === 'biblioteca' && (
           <DashboardPanel
             currentUser={currentUser}
             questionnaires={questionnaires}
@@ -304,6 +340,8 @@ export default function App() {
             key={selectedQuestionnaire?.id ?? 'no-questionnaire'}
             questionnaire={selectedQuestionnaire}
             onSubmit={handleResponseSubmit}
+            initialRespondentName={currentUser?.name ?? ''}
+            initialSector={currentUser?.sector ?? ''}
           />
         )}
 

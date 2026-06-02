@@ -57,13 +57,13 @@ export function exportSnapshotJson(questionnaires, responses) {
 }
 
 export function exportResponsesCsv(questionnaires, responses) {
-  const headers = ['questionnaire', 'respondent', 'unit', 'score', 'band', 'answered_at', 'notes'];
+  const headers = ['questionnaire', 'respondent', 'sector', 'score', 'band', 'answered_at', 'notes'];
   const rows = responses.map((response) => {
     const questionnaire = questionnaires.find((item) => item.id === response.questionnaireId);
     return [
       questionnaire?.title ?? response.questionnaireId,
       response.respondentName ?? '',
-      response.unit ?? '',
+      response.sector ?? response.unit ?? '',
       response.score ?? '',
       response.band ?? '',
       response.createdAt ?? '',
@@ -155,12 +155,13 @@ export async function exportReportPdf(questionnaires, responses) {
 
   autoTable(doc, {
     startY: responsesStartY + 4,
-    head: [['Questionário', 'Respondente', 'Pontos', 'Faixa', 'Data']],
+    head: [['Questionário', 'Respondente', 'Setor', 'Pontos', 'Faixa', 'Data']],
     body: recentResponses.map((response) => {
       const questionnaire = questionnaires.find((item) => item.id === response.questionnaireId);
       return [
         questionnaire?.title ?? response.questionnaireId,
         response.respondentName || 'Sem nome',
+        response.sector || 'Sem setor',
         String(response.score ?? ''),
         response.band ?? 'Sem faixa',
         response.createdAt ?? '',

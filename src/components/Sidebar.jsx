@@ -21,7 +21,7 @@ function getInitials(name) {
 
 function getRoleLabel(role) {
   if (role === 'admin') return 'Administrador';
-  if (role === 'leitor') return 'Leitor';
+  if (role === 'public') return 'Respondente';
   return 'Convidado';
 }
 
@@ -61,7 +61,7 @@ export default function Sidebar({ activeView, onChangeView, currentUser, onLogou
         <div className="profile-panel">
           <div className="profile-copy">
             <strong>{currentUser ? currentUser.name : 'Sem sessão'}</strong>
-            <span>{roleLabel}</span>
+            <span>{currentUser?.role === 'public' ? currentUser.sector : roleLabel}</span>
           </div>
           <span className="profile-avatar">{getInitials(currentUser?.name)}</span>
         </div>

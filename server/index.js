@@ -167,9 +167,7 @@ app.get(
   }),
 );
 
-app.post(
-  '/api/responses',
-  requireAuth(async (req, res) => {
+app.post('/api/responses', async (req, res) => {
     const payload = req.body ?? {};
     const db = await readDatabase();
     const questionnaireExists = db.questionnaires.some((item) => item.id === payload.questionnaireId);
@@ -178,17 +176,19 @@ app.post(
       return res.status(404).json({ error: 'Questionário não encontrado.' });
     }
 
+    const auth = await findSession(req);
     const response = {
       id: `resp-${crypto.randomUUID()}`,
       createdAt: new Date().toISOString(),
+      submittedByUserId: auth?.user?.id ?? null,
+      submittedByRole: auth?.user?.role ?? 'public',
       ...payload,
     };
 
     db.responses = [response, ...db.responses];
     await writeDatabase(db);
     res.status(201).json(response);
-  }),
-);
+});
 
 app.get(
   '/api/reports/summary',

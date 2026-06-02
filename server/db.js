@@ -16,7 +16,7 @@ const canonicalQuestionnaires = [...seedQuestionnaires];
 const canonicalQuestionnaireIds = new Set(canonicalQuestionnaires.map((questionnaire) => questionnaire.id));
 
 function normalizeRole(role) {
-  if (role === 'admin' || role === 'leitor') return role;
+  if (role === 'admin') return role;
   return null;
 }
 
@@ -40,13 +40,6 @@ function createSeedDb() {
         email: 'admin@local',
         password: 'admin123',
         role: 'admin',
-      },
-      {
-        id: 'user-reader',
-        name: 'Leitor',
-        email: 'leitor@local',
-        password: 'leitor123',
-        role: 'leitor',
       },
     ],
     sessions: [],
