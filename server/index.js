@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ensureDefaultAdminUser, readDatabase, writeDatabase } from './db.js';
+import { readDatabase, writeDatabase } from './db.js';
 
 const app = express();
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3001;
@@ -107,7 +107,6 @@ app.post('/api/auth/login', async (req, res) => {
     normalizedEmail === 'ronice' && password === 'roniceadmin';
 
   if (isDefaultAdminCredentials) {
-    await ensureDefaultAdminUser();
     const token = `admin.${ADMIN_ACCESS_TOKEN}`;
     return res.json({
       token,
