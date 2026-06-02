@@ -34,8 +34,49 @@ function createSeedDb() {
         password: 'admin123',
         role: 'admin',
       },
+      {
+        id: 'user-editor',
+        name: 'Editor',
+        email: 'editor@local',
+        password: 'editor123',
+        role: 'editor',
+      },
+      {
+        id: 'user-viewer',
+        name: 'Leitor',
+        email: 'viewer@local',
+        password: 'viewer123',
+        role: 'viewer',
+      },
     ],
     sessions: [],
+  };
+}
+
+function mergeMissingById(existingItems, defaultItems) {
+  const map = new Map(existingItems.map((item) => [item.id, item]));
+
+  for (const item of defaultItems) {
+    if (!map.has(item.id)) {
+      map.set(item.id, item);
+    }
+  }
+
+  return Array.from(map.values());
+}
+
+function normalizeDatabase(db) {
+  const seed = createSeedDb();
+  const questionnaires = mergeMissingById(db.questionnaires ?? [], seed.questionnaires);
+  const users = mergeMissingById(db.users ?? [], seed.users);
+  const responses = Array.isArray(db.responses) ? db.responses : [];
+  const sessions = Array.isArray(db.sessions) ? db.sessions : [];
+
+  return {
+    questionnaires,
+    responses,
+    users,
+    sessions,
   };
 }
 
@@ -52,7 +93,14 @@ export async function ensureDatabase() {
 export async function readDatabase() {
   await ensureDatabase();
   const raw = await fs.readFile(DB_PATH, 'utf8');
-  return JSON.parse(raw);
+  const parsed = JSON.parse(raw);
+  const normalized = normalizeDatabase(parsed);
+
+  if (JSON.stringify(normalized) !== JSON.stringify(parsed)) {
+    await writeDatabase(normalized);
+  }
+
+  return normalized;
 }
 
 export async function writeDatabase(db) {

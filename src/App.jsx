@@ -63,6 +63,7 @@ export default function App() {
   const [activeView, setActiveView] = useState('dashboard');
   const [selectedQuestionnaireId, setSelectedQuestionnaireId] = useState(null);
   const [syncStatus, setSyncStatus] = useState('Carregando');
+  const canManageContent = currentUser?.role === 'admin' || currentUser?.role === 'editor';
 
   const selectedQuestionnaire = useMemo(
     () => questionnaires.find((item) => item.id === selectedQuestionnaireId) ?? questionnaires[0] ?? null,
@@ -179,6 +180,8 @@ export default function App() {
   };
 
   const persistQuestionnaire = async (questionnaireId, nextQuestionnaire) => {
+    if (!canManageContent) return;
+
     const nextQuestionnaires = questionnaires.map((questionnaire) =>
       questionnaire.id === questionnaireId ? nextQuestionnaire : questionnaire,
     );
@@ -236,6 +239,8 @@ export default function App() {
   };
 
   const createQuestionnaire = async () => {
+    if (!canManageContent) return;
+
     const draft = createBlankQuestionnaire();
 
     try {
@@ -327,7 +332,9 @@ export default function App() {
           <div className="hero-stack">
             <div className="hero-card">
               <span>Usuário</span>
-              <strong>{currentUser?.name ?? 'Desconhecido'}</strong>
+              <strong>
+                {currentUser ? `${currentUser.name} · ${currentUser.role}` : 'Desconhecido'}
+              </strong>
             </div>
             <div className="hero-card accent">
               <span>Questionário selecionado</span>
@@ -348,7 +355,13 @@ export default function App() {
                   <span className="eyebrow">Resumo</span>
                   <h2>Visão geral</h2>
                 </div>
-                <button className="primary-button" onClick={createQuestionnaire} type="button">
+                <button
+                  className="primary-button"
+                  onClick={createQuestionnaire}
+                  type="button"
+                  disabled={!canManageContent}
+                  title={canManageContent ? 'Criar questionário' : 'Seu perfil não permite criar questionários'}
+                >
                   Novo questionário
                 </button>
               </div>
@@ -391,12 +404,18 @@ export default function App() {
 
         {activeView === 'biblioteca' && (
           <section className="panel">
-            <div className="panel-header">
-              <div>
-                <span className="eyebrow">Biblioteca</span>
-                <h2>Modelos disponíveis</h2>
-              </div>
-              <button className="primary-button" onClick={createQuestionnaire} type="button">
+              <div className="panel-header">
+                <div>
+                  <span className="eyebrow">Biblioteca</span>
+                  <h2>Modelos disponíveis</h2>
+                </div>
+              <button
+                className="primary-button"
+                onClick={createQuestionnaire}
+                type="button"
+                disabled={!canManageContent}
+                title={canManageContent ? 'Criar modelo' : 'Seu perfil não permite criar modelos'}
+              >
                 Criar modelo
               </button>
             </div>
@@ -420,6 +439,7 @@ export default function App() {
             onUpdateQuestionnaire={updateQuestionnaire}
             onAddQuestion={addQuestion}
             onRemoveQuestion={removeQuestion}
+            canEdit={canManageContent}
           />
         )}
 

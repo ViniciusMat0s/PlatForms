@@ -56,6 +56,16 @@ function requireAuth(handler) {
   };
 }
 
+function requireRole(allowedRoles, handler) {
+  return requireAuth(async (req, res, next) => {
+    if (!allowedRoles.includes(req.auth.user.role)) {
+      return res.status(403).json({ error: 'Permissão insuficiente.' });
+    }
+
+    return handler(req, res, next);
+  });
+}
+
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true, service: 'forms-platform-api' });
 });
@@ -122,7 +132,7 @@ app.get(
 
 app.post(
   '/api/questionnaires',
-  requireAuth(async (req, res) => {
+  requireRole(['admin', 'editor'], async (req, res) => {
     const questionnaire = createQuestionnaireFromInput(req.body ?? {});
     const db = await readDatabase();
     db.questionnaires = [questionnaire, ...db.questionnaires];
@@ -133,7 +143,7 @@ app.post(
 
 app.put(
   '/api/questionnaires/:id',
-  requireAuth(async (req, res) => {
+  requireRole(['admin', 'editor'], async (req, res) => {
     const { id } = req.params;
     const db = await readDatabase();
     const index = db.questionnaires.findIndex((item) => item.id === id);
@@ -161,7 +171,7 @@ app.put(
 
 app.delete(
   '/api/questionnaires/:id',
-  requireAuth(async (req, res) => {
+  requireRole(['admin', 'editor'], async (req, res) => {
     const { id } = req.params;
     const db = await readDatabase();
     const exists = db.questionnaires.some((item) => item.id === id);

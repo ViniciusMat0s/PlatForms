@@ -43,7 +43,7 @@ export default function Sidebar({
       <div className="sidebar-footer">
         <div className="stat-pill">
           <span>Usuário</span>
-          <strong>{currentUser?.name ?? 'Sem sessão'}</strong>
+          <strong>{currentUser ? `${currentUser.name} · ${currentUser.role}` : 'Sem sessão'}</strong>
         </div>
         <div className="stat-pill">
           <span>Questionários</span>

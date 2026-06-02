@@ -42,6 +42,8 @@ export default function LoginPanel({ onLogin, loading, error }) {
         <div className="login-hint">
           <strong>Conta inicial</strong>
           <span>admin@local / admin123</span>
+          <span>editor@local / editor123</span>
+          <span>viewer@local / viewer123</span>
         </div>
       </div>
     </section>

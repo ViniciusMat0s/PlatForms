@@ -3,6 +3,7 @@ export default function QuestionnaireEditor({
   onUpdateQuestionnaire,
   onAddQuestion,
   onRemoveQuestion,
+  canEdit = true,
 }) {
   if (!questionnaire) {
     return <div className="empty-state">Selecione ou crie um questionário para começar.</div>;
@@ -29,8 +30,14 @@ export default function QuestionnaireEditor({
           <span className="eyebrow">Construtor</span>
           <h2>Estrutura do questionário</h2>
         </div>
-        <span className="badge">Rascunho editável</span>
+        <span className="badge">{canEdit ? 'Rascunho editável' : 'Apenas leitura'}</span>
       </div>
+
+      {!canEdit ? (
+        <div className="empty-state small">
+          Seu perfil atual pode visualizar questionários, mas não alterar a estrutura.
+        </div>
+      ) : null}
 
       <div className="editor-grid">
         <label className="field">
@@ -39,6 +46,7 @@ export default function QuestionnaireEditor({
             value={questionnaire.title}
             onChange={(event) => updateField('title', event.target.value)}
             placeholder="Nome do questionário"
+            disabled={!canEdit}
           />
         </label>
 
@@ -48,6 +56,7 @@ export default function QuestionnaireEditor({
             value={questionnaire.subtitle}
             onChange={(event) => updateField('subtitle', event.target.value)}
             placeholder="Descrição curta"
+            disabled={!canEdit}
           />
         </label>
 
@@ -57,6 +66,7 @@ export default function QuestionnaireEditor({
             value={questionnaire.domain}
             onChange={(event) => updateField('domain', event.target.value)}
             placeholder="Ex: saúde mental"
+            disabled={!canEdit}
           />
         </label>
 
@@ -66,6 +76,7 @@ export default function QuestionnaireEditor({
             value={questionnaire.audience}
             onChange={(event) => updateField('audience', event.target.value)}
             placeholder="Ex: Adulto"
+            disabled={!canEdit}
           />
         </label>
       </div>
@@ -82,6 +93,7 @@ export default function QuestionnaireEditor({
               key={`${questionnaire.id}-scale-${index}`}
               value={label}
               onChange={(event) => updateScaleLabel(index, event.target.value)}
+              disabled={!canEdit}
             />
           ))}
         </div>
@@ -90,7 +102,12 @@ export default function QuestionnaireEditor({
       <div className="questions-editor">
         <div className="section-title">
           <h3>Perguntas</h3>
-          <button className="ghost-button" onClick={() => onAddQuestion(questionnaire.id)} type="button">
+          <button
+            className="ghost-button"
+            onClick={() => onAddQuestion(questionnaire.id)}
+            type="button"
+            disabled={!canEdit}
+          >
             Adicionar pergunta
           </button>
         </div>
@@ -110,11 +127,13 @@ export default function QuestionnaireEditor({
                   })
                 }
                 placeholder="Digite a pergunta"
+                disabled={!canEdit}
               />
               <button
                 className="danger-button"
                 onClick={() => onRemoveQuestion(questionnaire.id, question.id)}
                 type="button"
+                disabled={!canEdit}
               >
                 Remover
               </button>
