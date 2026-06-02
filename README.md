@@ -15,6 +15,8 @@ npm run dev
 - Construtor simples para editar título, escala e perguntas
 - Tela de resposta com cálculo básico de resultado
 - Painel com respostas recentes e métricas locais
+- Modelo formal dos questionários em `src/data/questionnaireSchema.js`
+- Roadmap do produto em `docs/roadmap.md`
 
 ## Próximos passos naturais
 
