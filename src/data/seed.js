@@ -36,6 +36,11 @@ const engagementScale = createScale({
   labels: ['1', '2', '3', '4', '5'],
 });
 
+const boredomScale = createScale({
+  id: 'boredom-5',
+  labels: ['1', '2', '3', '4', '5'],
+});
+
 const burnoutScale = createScale({
   id: 'burnout-5',
   labels: ['Nunca', 'Raramente', 'Às Vezes', 'Frequentemente', 'Sempre'],
@@ -254,6 +259,31 @@ export const seedQuestionnaires = [
       q('en-7', 'Tenho orgulho do Trabalho que realizo', false, 'dedicacao'),
       q('en-8', 'Eu fico imerso no meu trabalho', false, 'absorcao'),
       q('en-9', 'Não vejo o tempo passar quando estou trabalhando', false, 'absorcao'),
+    ],
+  }),
+  createQuestionnaire({
+    id: createQuestionnaireId('Será que me sinto entediado no meu trabalho?'),
+    code: 'sera-que-me-sinto-entediado-no-meu-trabalho',
+    title: 'Será que me sinto entediado no meu trabalho?',
+    subtitle: 'Tédio, monotonia e dificuldade de engajamento.',
+    audience: 'Adulto',
+    domain: 'Trabalho e bem-estar',
+    source: 'Documento enviado pelo usuário',
+    status: 'active',
+    tags: ['tedio', 'trabalho'],
+    scale: boredomScale,
+    bands: defaultBands,
+    scoring: { type: 'mean_scaled', reverseQuestions: [] },
+    questions: [
+      q('tb-1', 'O tempo passa muito devagar no meu trabalho'),
+      q('tb-2', 'Sinto-me entediado no trabalho'),
+      q('tb-3', 'Passo muito tempo atoa no meu trabalho'),
+      q('tb-4', 'Sinto-me inquieto no trabalho'),
+      q('tb-5', 'Sonho acordado no meu horário de trabalho'),
+      q('tb-6', 'Parece que meu dia de trabalho nunca termina'),
+      q('tb-7', 'Tenho a tendência de fazer outras coisas quando estou trabalhando'),
+      q('tb-8', 'Não há muito o que fazer no meu trabalho'),
+      q('tb-9', 'Tenho dificuldade em cumprir regras, prazos e combinações no meu trabalho.'),
     ],
   }),
   createQuestionnaire({
