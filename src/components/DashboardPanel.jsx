@@ -27,9 +27,11 @@ export default function DashboardPanel({
   onCreateQuestionnaire,
   onOpenView,
   onSelectQuestionnaire,
+  onStartQuestionnaire,
   canManageContent = true,
   activeView = 'dashboard',
   syncStatus,
+  readerMode = false,
 }) {
   const metrics = buildDashboardMetrics(questionnaires, responses);
   const rows = visibleQuestionnaires ?? questionnaires;
@@ -43,7 +45,9 @@ export default function DashboardPanel({
   const subtitle =
     activeView === 'biblioteca'
       ? 'Veja os formulários cadastrados, abra um modelo e envie para outras pessoas.'
-      : 'Crie formulários, envie rapidamente e acompanhe as respostas em uma tela simples.';
+      : readerMode
+        ? 'Escolha um formulário e responda direto pela plataforma.'
+        : 'Crie formulários, envie rapidamente e acompanhe as respostas em uma tela simples.';
 
   return (
     <section className="workspace-page">
@@ -55,33 +59,43 @@ export default function DashboardPanel({
         </div>
 
         <div className="workspace-actions">
-          <button className="ghost-button" type="button" onClick={() => onOpenView('resultados')}>
-            Ver respostas
-          </button>
-          <button className="primary-button" type="button" onClick={onCreateQuestionnaire} disabled={!canManageContent}>
-            Novo formulário
-          </button>
+          {readerMode ? (
+            <button className="ghost-button" type="button" onClick={() => onOpenView('responder')}>
+              Ver formulários
+            </button>
+          ) : (
+            <button className="ghost-button" type="button" onClick={() => onOpenView('resultados')}>
+              Ver respostas
+            </button>
+          )}
+          {readerMode ? null : (
+            <button className="primary-button" type="button" onClick={onCreateQuestionnaire} disabled={!canManageContent}>
+              Novo formulário
+            </button>
+          )}
         </div>
       </header>
 
-      <div className="workspace-summary">
-        <div className="summary-chip">
-          <span>Formulários</span>
-          <strong>{metrics.counts.total}</strong>
+      {readerMode ? null : (
+        <div className="workspace-summary">
+          <div className="summary-chip">
+            <span>Formulários</span>
+            <strong>{metrics.counts.total}</strong>
+          </div>
+          <div className="summary-chip">
+            <span>Respostas</span>
+            <strong>{metrics.counts.responses}</strong>
+          </div>
+          <div className="summary-chip">
+            <span>Média</span>
+            <strong>{metrics.averageScore.toFixed(1)}</strong>
+          </div>
+          <div className="summary-chip muted">
+            <span>Status</span>
+            <strong>{syncStatus ?? 'Online'}</strong>
+          </div>
         </div>
-        <div className="summary-chip">
-          <span>Respostas</span>
-          <strong>{metrics.counts.responses}</strong>
-        </div>
-        <div className="summary-chip">
-          <span>Média</span>
-          <strong>{metrics.averageScore.toFixed(1)}</strong>
-        </div>
-        <div className="summary-chip muted">
-          <span>Status</span>
-          <strong>{syncStatus ?? 'Online'}</strong>
-        </div>
-      </div>
+      )}
 
       <div className="table-shell">
         <div className="table-shell-header">
@@ -89,9 +103,11 @@ export default function DashboardPanel({
             <h2>Formulários</h2>
             <span>{rows.length} itens</span>
           </div>
-          <button className="ghost-button" type="button" onClick={() => onOpenView('biblioteca')}>
-            Abrir lista
-          </button>
+          {readerMode ? null : (
+            <button className="ghost-button" type="button" onClick={() => onOpenView('biblioteca')}>
+              Abrir lista
+            </button>
+          )}
         </div>
 
         <div className="table-scroll">
@@ -99,10 +115,10 @@ export default function DashboardPanel({
             <thead>
               <tr>
                 <th>Formulário</th>
-                <th>Status</th>
+                {readerMode ? null : <th>Status</th>}
                 <th>Perguntas</th>
-                <th>Respostas</th>
-                <th>Média</th>
+                {readerMode ? null : <th>Respostas</th>}
+                {readerMode ? null : <th>Média</th>}
                 <th>Público</th>
                 <th />
               </tr>
@@ -110,7 +126,7 @@ export default function DashboardPanel({
             <tbody>
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={7}>
+                  <td colSpan={readerMode ? 4 : 7}>
                     <div className="empty-state small">Nenhum formulário encontrado.</div>
                   </td>
                 </tr>
@@ -127,20 +143,24 @@ export default function DashboardPanel({
                         <strong>{questionnaire.title}</strong>
                         <span>{questionnaire.domain}</span>
                       </td>
-                      <td>
-                        <StatusPill questionnaire={questionnaire} />
-                      </td>
+                      {readerMode ? null : (
+                        <td>
+                          <StatusPill questionnaire={questionnaire} />
+                        </td>
+                      )}
                       <td>{questionnaire.questions.length}</td>
-                      <td>{summary?.relatedCount ?? 0}</td>
-                      <td>{summary?.averageScore ?? '0.0'}</td>
+                      {readerMode ? null : <td>{summary?.relatedCount ?? 0}</td>}
+                      {readerMode ? null : <td>{summary?.averageScore ?? '0.0'}</td>}
                       <td>{questionnaire.audience}</td>
                       <td className="table-actions">
-                        <button className="icon-button" type="button" onClick={() => onOpenView('responder')}>
+                        <button className="icon-button" type="button" onClick={() => onStartQuestionnaire?.(questionnaire.id)}>
                           <Icon name="runner" size={16} />
                         </button>
-                        <button className="icon-button" type="button" onClick={() => onOpenView('construtor')}>
-                          <Icon name="builder" size={16} />
-                        </button>
+                        {readerMode ? null : (
+                          <button className="icon-button" type="button" onClick={() => onOpenView('construtor')}>
+                            <Icon name="builder" size={16} />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   );
@@ -165,15 +185,24 @@ export default function DashboardPanel({
         </div>
 
         <div className="workspace-footer-actions">
-          <button className="ghost-button" type="button" onClick={() => onOpenView('responder')} disabled={!preview}>
+          <button
+            className="ghost-button"
+            type="button"
+            onClick={() => onStartQuestionnaire?.(preview?.id)}
+            disabled={!preview}
+          >
             Responder
           </button>
-          <button className="ghost-button" type="button" onClick={() => onOpenView('resultados')} disabled={!preview}>
-            Resultados
-          </button>
-          <button className="primary-button" type="button" onClick={onCreateQuestionnaire} disabled={!canManageContent}>
-            Criar
-          </button>
+          {readerMode ? null : (
+            <>
+              <button className="ghost-button" type="button" onClick={() => onOpenView('resultados')} disabled={!preview}>
+                Resultados
+              </button>
+              <button className="primary-button" type="button" onClick={onCreateQuestionnaire} disabled={!canManageContent}>
+                Criar
+              </button>
+            </>
+          )}
         </div>
       </div>
     </section>

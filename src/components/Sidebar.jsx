@@ -7,7 +7,7 @@ const adminNavigation = [
   { id: 'resultados', label: 'Respostas', icon: 'results' },
 ];
 
-const readerNavigation = [{ id: 'responder', label: 'Responder', icon: 'runner' }];
+const readerNavigation = [{ id: 'biblioteca', label: 'Formulários', icon: 'library' }];
 
 function getInitials(name) {
   if (!name) return 'FP';

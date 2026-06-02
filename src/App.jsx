@@ -186,12 +186,12 @@ export default function App() {
     const allowedViews =
       currentUser.role === 'admin'
         ? ['dashboard', 'biblioteca', 'construtor', 'responder', 'resultados']
-        : ['responder'];
+        : ['biblioteca', 'responder'];
 
     if (!allowedViews.includes(activeView)) {
-      setActiveView(getDefaultViewForRole(currentUser.role));
+      setActiveView(currentUser.role === 'leitor' ? 'biblioteca' : getDefaultViewForRole(currentUser.role));
     }
-  }, [activeView, currentUser]);
+  }, [activeView, currentUser, questionnaires]);
 
   const handleLogin = async ({ email, password }) => {
     setAuthLoading(true);
@@ -202,7 +202,7 @@ export default function App() {
       setCurrentUser(data.user);
       setAuthStatus('signed_in');
       await hydrateState(data.user.role);
-      setActiveView(getDefaultViewForRole(data.user.role));
+      setActiveView(data.user.role === 'leitor' ? 'biblioteca' : getDefaultViewForRole(data.user.role));
     } catch (error) {
       setAuthError(error.message || 'Falha ao entrar.');
     } finally {
@@ -333,6 +333,13 @@ export default function App() {
     }
   };
 
+  const startQuestionnaire = (questionnaireId) => {
+    if (questionnaireId) {
+      setSelectedQuestionnaireId(questionnaireId);
+    }
+    setActiveView('responder');
+  };
+
   if (authStatus === 'checking') {
     return (
       <section className="login-shell">
@@ -364,6 +371,25 @@ export default function App() {
       />
 
       <main className="main-content">
+        {currentUser?.role === 'leitor' && activeView === 'biblioteca' && (
+          <DashboardPanel
+            currentUser={currentUser}
+            questionnaires={questionnaires}
+            visibleQuestionnaires={visibleQuestionnaires}
+            responses={responses}
+            selectedQuestionnaire={selectedQuestionnaire}
+            selectedQuestionnaireId={selectedQuestionnaireId}
+            onCreateQuestionnaire={createQuestionnaire}
+            onOpenView={setActiveView}
+            onSelectQuestionnaire={setSelectedQuestionnaireId}
+            onStartQuestionnaire={startQuestionnaire}
+            canManageContent={false}
+            activeView={activeView}
+            syncStatus={syncStatus}
+            readerMode
+          />
+        )}
+
         {currentUser?.role === 'admin' && (activeView === 'dashboard' || activeView === 'biblioteca') && (
           <DashboardPanel
             currentUser={currentUser}
@@ -375,6 +401,7 @@ export default function App() {
             onCreateQuestionnaire={createQuestionnaire}
             onOpenView={setActiveView}
             onSelectQuestionnaire={setSelectedQuestionnaireId}
+            onStartQuestionnaire={startQuestionnaire}
             canManageContent={canManageContent}
             activeView={activeView}
             syncStatus={syncStatus}
