@@ -17,23 +17,11 @@ function getInitials(name) {
     .join('');
 }
 
-export default function Sidebar({
-  activeView,
-  onChangeView,
-  currentUser,
-  onLogout,
-  searchQuery = '',
-  onSearchChange = () => {},
-  questionnaires = [],
-  selectedQuestionnaireId,
-  onSelectQuestionnaire = () => {},
-}) {
-  const recentQuestionnaires = questionnaires.slice(0, 3);
-
+export default function Sidebar({ activeView, onChangeView, currentUser, onLogout }) {
   return (
     <aside className="sidebar">
       <div className="sidebar-top">
-        <div className="brand">
+        <div className="brand brand-compact">
           <span className="brand-mark">FP</span>
           <div>
             <strong>Forms Platform</strong>
@@ -41,61 +29,21 @@ export default function Sidebar({
           </div>
         </div>
 
-        <label className="sidebar-search">
-          <Icon name="search" size={16} />
-          <input
-            value={searchQuery}
-            onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="Pesquisa rápida..."
-          />
-          <span className="sidebar-shortcut">Ctrl K</span>
-        </label>
-
-        <div className="sidebar-section">
-          <span className="sidebar-section-title">Navegação</span>
-          <nav className="nav">
-            {navigation.map((item) => (
-              <button
-                key={item.id}
-                className={`nav-item ${activeView === item.id ? 'active' : ''}`}
-                onClick={() => onChangeView(item.id)}
-                type="button"
-              >
-                <span className="nav-icon">
-                  <Icon name={item.icon} size={16} />
-                </span>
-                <span className="nav-label">{item.label}</span>
-              </button>
-            ))}
-          </nav>
-        </div>
-
-        <div className="sidebar-section">
-          <span className="sidebar-section-title">Recentes</span>
-          <div className="sidebar-recent-list">
-            {recentQuestionnaires.length === 0 ? (
-              <div className="sidebar-empty">Nenhum formulário recente.</div>
-            ) : (
-              recentQuestionnaires.map((questionnaire) => (
-                <button
-                  key={questionnaire.id}
-                  type="button"
-                  className={`sidebar-recent-item ${selectedQuestionnaireId === questionnaire.id ? 'active' : ''}`}
-                  onClick={() => {
-                    onSelectQuestionnaire(questionnaire.id);
-                    onChangeView('dashboard');
-                  }}
-                >
-                  <div>
-                    <strong>{questionnaire.title}</strong>
-                    <span>{questionnaire.domain}</span>
-                  </div>
-                  <Icon name="chart" size={14} />
-                </button>
-              ))
-            )}
-          </div>
-        </div>
+        <nav className="nav">
+          {navigation.map((item) => (
+            <button
+              key={item.id}
+              className={`nav-item ${activeView === item.id ? 'active' : ''}`}
+              onClick={() => onChangeView(item.id)}
+              type="button"
+            >
+              <span className="nav-icon">
+                <Icon name={item.icon} size={16} />
+              </span>
+              <span className="nav-label">{item.label}</span>
+            </button>
+          ))}
+        </nav>
       </div>
 
       <div className="sidebar-footer">
