@@ -26,6 +26,11 @@ const purposeOfLifeScale = createScale({
   labels: ['1', '2', '3', '4'],
 });
 
+const selfEsteemScale = createScale({
+  id: 'self-esteem-4',
+  labels: ['1', '2', '3', '4'],
+});
+
 const defaultBands = [
   createBand(0, 19, 'Muito baixo'),
   createBand(20, 39, 'Baixo'),
@@ -190,6 +195,32 @@ export const seedQuestionnaires = [
       q('pv-7', 'Eu sinto que sou uma pessoa de valor assim como as outras'),
       q('pv-8', 'Não me dou o devido valor. Gostaria de ter mais respeito por mim.'),
       q('pv-9', 'Quase sempre estou inclinado(a) a achar que sou um fracasso.'),
+      q('pv-10', 'Eu tenho uma atitude positiva (sentimentos, ações) em relação a mim mesmo(a)'),
+    ],
+  }),
+  createQuestionnaire({
+    id: createQuestionnaireId('Avalie seu propósito de vida - Autoestima'),
+    code: 'avalie-seu-proposito-de-vida-autoestima',
+    title: 'Avalie seu propósito de vida',
+    subtitle: 'Autoestima.',
+    audience: 'Adulto',
+    domain: 'Saúde mental',
+    source: 'Documento enviado pelo usuário',
+    status: 'active',
+    tags: ['autoestima'],
+    scale: selfEsteemScale,
+    bands: defaultBands,
+    scoring: { type: 'mean_scaled', reverseQuestions: ['pv-2', 'pv-5', 'pv-6', 'pv-8', 'pv-9'] },
+    questions: [
+      q('pv-1', 'De uma forma geral estou satisfeito comigo mesmo(a)?'),
+      q('pv-2', 'Às vezes acho que não sirvo pra nada.', true),
+      q('pv-3', 'Eu sinto que tenho um tanto de boas qualidades.'),
+      q('pv-4', 'Eu sou capaz de fazer as coisas tão bem quanto as outras pessoas.'),
+      q('pv-5', 'Não sinto satisfação nas coisas que realizei. Não tenho muito do que me orgulhar.', true),
+      q('pv-6', 'Às vezes eu me sinto realmente inútil (incapaz)', true),
+      q('pv-7', 'Eu sinto que sou uma pessoa de valor assim como as outras'),
+      q('pv-8', 'Não me dou o devido valor. Gostaria de ter mais respeito por mim.', true),
+      q('pv-9', 'Quase sempre estou inclinado(a) a achar que sou um fracasso.', true),
       q('pv-10', 'Eu tenho uma atitude positiva (sentimentos, ações) em relação a mim mesmo(a)'),
     ],
   }),
