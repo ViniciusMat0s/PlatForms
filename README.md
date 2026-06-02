@@ -9,6 +9,10 @@ npm install
 npm run dev
 ```
 
+## Deploy
+
+- Veja [`docs/deployment.md`](./docs/deployment.md) para `npm start` e Docker.
+
 ## O que já existe
 
 - Biblioteca inicial de questionários baseada no levantamento enviado

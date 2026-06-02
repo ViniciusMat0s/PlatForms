@@ -1,6 +1,8 @@
 import cors from 'cors';
 import express from 'express';
 import crypto from 'node:crypto';
+import { existsSync } from 'node:fs';
+import path from 'node:path';
 import { createQuestionnaireFromInput, readDatabase, writeDatabase } from './db.js';
 
 const app = express();
@@ -232,6 +234,17 @@ app.get(
     });
   }),
 );
+
+const distPath = path.resolve(process.cwd(), 'dist');
+const indexPath = path.join(distPath, 'index.html');
+const serveClient = process.env.SERVE_CLIENT !== 'false' && existsSync(indexPath);
+
+if (serveClient) {
+  app.use(express.static(distPath));
+  app.get(/^\/(?!api).*/, (_req, res) => {
+    res.sendFile(indexPath);
+  });
+}
 
 app.use((error, _req, res, _next) => {
   console.error(error);
