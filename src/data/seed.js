@@ -16,6 +16,11 @@ const resilienceScale = createScale({
   labels: ['Concordo Totalmente', 'Concordo Pouco', 'Discordo Muito', 'Discordo Pouco', 'Discordo Totalmente'],
 });
 
+const automaticThoughtsScale = createScale({
+  id: 'automatic-thoughts-4',
+  labels: ['Raramente', 'De vez em quando', 'Frequentemente', 'Sempre'],
+});
+
 const defaultBands = [
   createBand(0, 19, 'Muito baixo'),
   createBand(20, 39, 'Baixo'),
@@ -125,6 +130,36 @@ export const seedQuestionnaires = [
       q('rs-11', 'Vivo um dia de cada vez'),
       q('rs-12', 'Eu não fico obcecado(a) com coisas que não posso resolver.'),
       q('rs-13', 'Sou capaz de depender de mim próprio(a) do que qualquer outra pessoa.'),
+    ],
+  }),
+  createQuestionnaire({
+    id: createQuestionnaireId('Escala de Pensamentos Automáticos'),
+    code: 'escala-de-pensamentos-automaticos',
+    title: 'Escala de Pensamentos Automáticos',
+    subtitle: 'Lista de pensamentos automáticos negativos frequentes.',
+    audience: 'Adulto',
+    domain: 'Cognição',
+    source: 'Documento enviado pelo usuário',
+    status: 'active',
+    tags: ['pensamentos-automaticos', 'cognicao'],
+    scale: automaticThoughtsScale,
+    bands: defaultBands,
+    scoring: { type: 'mean_scaled', reverseQuestions: [] },
+    questions: [
+      q('pa-1', 'Eu me odeio'),
+      q('pa-2', 'Eu sou um fracasso'),
+      q('pa-3', 'Não sirvo pra nada'),
+      q('pa-4', 'Nada mais da certo pra mim'),
+      q('pa-5', 'Eu transformei minha vida em uma grande bagunça'),
+      q('pa-6', 'Eu pareço um idiota'),
+      q('pa-7', 'Tem alguma coisa muito errada comigo'),
+      q('pa-8', 'Eu nunca serei tão bom quanto as outras pessoas'),
+      q('pa-9', 'Eu não consigo fazer nada direito'),
+      q('pa-10', 'Eu sempre levo a culpa por coisas que não faço'),
+      q('pa-11', 'Eu nunca vou superar meus problemas'),
+      q('pa-12', 'Eu estou ficando louco'),
+      q('pa-13', 'É minha culpa se as coisas deram errado'),
+      q('pa-14', 'Eu vou parecer um bobão'),
     ],
   }),
 ];
