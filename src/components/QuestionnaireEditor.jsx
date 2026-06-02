@@ -6,7 +6,7 @@ export default function QuestionnaireEditor({
   canEdit = true,
 }) {
   if (!questionnaire) {
-    return <div className="empty-state">Selecione ou crie um questionário para começar.</div>;
+    return <div className="empty-state">Escolha ou crie um formulário para começar.</div>;
   }
 
   const updateField = (field, value) => {
@@ -28,7 +28,8 @@ export default function QuestionnaireEditor({
       <div className="panel-header">
         <div>
           <span className="eyebrow">Editar</span>
-          <h2>Questionário</h2>
+          <h2>Formulário</h2>
+          <p>Edite só o que precisar. O restante fica salvo automaticamente.</p>
         </div>
       </div>
 
@@ -40,23 +41,23 @@ export default function QuestionnaireEditor({
           <input
             value={questionnaire.title}
             onChange={(event) => updateField('title', event.target.value)}
-            placeholder="Nome do questionário"
+            placeholder="Nome do formulário"
             disabled={!canEdit}
           />
         </label>
 
         <label className="field">
-          <span>Subtítulo</span>
+          <span>Descrição curta</span>
           <input
             value={questionnaire.subtitle}
             onChange={(event) => updateField('subtitle', event.target.value)}
-            placeholder="Descrição curta"
+            placeholder="Explique o objetivo em poucas palavras"
             disabled={!canEdit}
           />
         </label>
 
         <label className="field">
-          <span>Domínio</span>
+          <span>Categoria</span>
           <input
             value={questionnaire.domain}
             onChange={(event) => updateField('domain', event.target.value)}
@@ -80,7 +81,7 @@ export default function QuestionnaireEditor({
         <div className="section-title">
           <div>
             <h3>Escala de resposta</h3>
-            <p>Edite os rótulos se o instrumento pedir outra escala.</p>
+            <p>Se precisar, troque só os rótulos das opções.</p>
           </div>
         </div>
 
@@ -100,7 +101,7 @@ export default function QuestionnaireEditor({
         <div className="section-title">
           <div>
             <h3>Perguntas</h3>
-            <p>Adicione, edite ou remova os itens do formulário.</p>
+            <p>Escreva cada item de forma simples e direta.</p>
           </div>
           <button
             className="ghost-button"

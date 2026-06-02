@@ -9,7 +9,7 @@ export default function QuestionnaireCard({ questionnaire, isSelected, onSelect 
     >
       <div className="card-topline">
         <span>{domain}</span>
-        <span>{questionnaire.status ?? 'draft'}</span>
+        <span>{questionnaire.status ?? 'rascunho'}</span>
       </div>
       <h3>{title}</h3>
       <p>{subtitle}</p>

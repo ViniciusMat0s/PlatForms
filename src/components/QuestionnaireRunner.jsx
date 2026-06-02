@@ -10,7 +10,7 @@ export default function QuestionnaireRunner({ questionnaire, onSubmit }) {
   const result = useMemo(() => scoreQuestionnaire(questionnaire, answers), [answers, questionnaire]);
 
   if (!questionnaire) {
-    return <div className="empty-state">Selecione um questionário para responder.</div>;
+    return <div className="empty-state">Escolha um formulário para responder.</div>;
   }
 
   const handleSubmit = async (event) => {
@@ -27,7 +27,7 @@ export default function QuestionnaireRunner({ questionnaire, onSubmit }) {
     setSubmitted(true);
   };
 
-  const resetAnswer = (questionId, value) => {
+  const setAnswer = (questionId, value) => {
     setAnswers((current) => ({ ...current, [questionId]: value }));
   };
 
@@ -37,7 +37,7 @@ export default function QuestionnaireRunner({ questionnaire, onSubmit }) {
         <div>
           <span className="eyebrow">Responder</span>
           <h2>{questionnaire.title}</h2>
-          <p>Preencha os dados básicos e responda as perguntas abaixo.</p>
+          <p>Preencha seus dados e marque a opção que mais faz sentido.</p>
         </div>
         <div className="result-chip">
           <strong>{result.score}</strong>
@@ -47,11 +47,11 @@ export default function QuestionnaireRunner({ questionnaire, onSubmit }) {
 
       <div className="editor-grid runner-info-grid">
         <label className="field">
-          <span>Nome</span>
+          <span>Seu nome</span>
           <input value={respondentName} onChange={(event) => setRespondentName(event.target.value)} />
         </label>
         <label className="field">
-          <span>Unidade</span>
+          <span>Unidade / setor</span>
           <input value={unit} onChange={(event) => setUnit(event.target.value)} />
         </label>
       </div>
@@ -80,7 +80,7 @@ export default function QuestionnaireRunner({ questionnaire, onSubmit }) {
                     type="radio"
                     name={question.id}
                     checked={answers[question.id] === value}
-                    onChange={() => resetAnswer(question.id, value)}
+                    onChange={() => setAnswer(question.id, value)}
                   />
                   <span>{label}</span>
                 </label>
@@ -94,7 +94,7 @@ export default function QuestionnaireRunner({ questionnaire, onSubmit }) {
         <button className="primary-button" type="submit">
           Salvar resposta
         </button>
-        <span className="hint">{submitted ? 'Resposta salva.' : 'A resposta será salva ao final.'}</span>
+        <span className="hint">{submitted ? 'Resposta salva.' : 'Você pode salvar quando terminar.'}</span>
       </div>
     </form>
   );

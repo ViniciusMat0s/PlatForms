@@ -13,10 +13,8 @@ export default function LoginPanel({ onLogin, loading, error }) {
     <section className="login-shell">
       <div className="login-card">
         <span className="eyebrow">Acesso restrito</span>
-        <h1>Entrar na plataforma</h1>
-        <p>
-          Use uma conta autorizada para gerenciar questionários, respostas e relatórios.
-        </p>
+        <h1>Acesse sua conta</h1>
+        <p>Use uma conta da equipe para criar formulários, responder e ver os resultados.</p>
 
         <form className="login-form" onSubmit={handleSubmit}>
           <label className="field">
@@ -40,7 +38,7 @@ export default function LoginPanel({ onLogin, loading, error }) {
         </form>
 
         <div className="login-hint">
-          <strong>Conta inicial</strong>
+          <strong>Contas de teste</strong>
           <span>admin@local / admin123</span>
           <span>editor@local / editor123</span>
           <span>viewer@local / viewer123</span>

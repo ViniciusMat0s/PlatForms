@@ -42,15 +42,15 @@ export default function DashboardPanel({
     selectedQuestionnaire ??
     metrics.summaries[0] ??
     null;
-  const topQuestionnaires = metrics.summaries.slice(0, 5);
+  const topQuestionnaires = metrics.summaries.slice(0, 4);
 
   return (
     <section className="dashboard-page">
       <header className="dashboard-topbar">
         <div className="dashboard-intro">
           <span className="eyebrow">Olá, {currentUser?.name?.split(' ')?.[0] ?? 'usuário'}!</span>
-          <h1>Dashboard</h1>
-          <p>Escolha uma ação para começar. Tudo o que importa está logo abaixo.</p>
+          <h1>Painel simples</h1>
+          <p>Escolha o próximo passo sem precisar pensar muito.</p>
         </div>
 
         <div className="profile-chip">
@@ -66,77 +66,79 @@ export default function DashboardPanel({
         <article className="dashboard-card">
           <div className="card-heading">
             <div>
-              <span className="eyebrow">Ações rápidas</span>
-              <h2>Comece por aqui</h2>
+              <span className="eyebrow">Próximo passo</span>
+              <h2>Escolha uma ação</h2>
             </div>
           </div>
 
           <div className="quick-actions">
+            <button className="quick-action" type="button" onClick={() => onOpenView('biblioteca')}>
+              <Icon name="library" size={22} />
+              <span>
+                <strong>Ver formulários</strong>
+                <small>Escolha um modelo para usar</small>
+              </span>
+            </button>
             <button className="quick-action" type="button" onClick={() => onOpenView('responder')}>
               <Icon name="runner" size={22} />
               <span>
-                <strong>Responder formulário</strong>
-                <small>Abrir um questionário para resposta</small>
-              </span>
-            </button>
-            <button
-              className="quick-action"
-              type="button"
-              onClick={onCreateQuestionnaire}
-              disabled={!canManageContent}
-            >
-              <Icon name="builder" size={22} />
-              <span>
-                <strong>Criar formulário</strong>
-                <small>Adicionar um novo modelo</small>
+                <strong>Responder agora</strong>
+                <small>Preencher um formulário em andamento</small>
               </span>
             </button>
             <button className="quick-action" type="button" onClick={() => onOpenView('resultados')}>
               <Icon name="results" size={22} />
               <span>
                 <strong>Ver resultados</strong>
-                <small>Consultar respostas e relatórios</small>
+                <small>Conferir respostas e exportações</small>
+              </span>
+            </button>
+            <button className="quick-action" type="button" onClick={onCreateQuestionnaire} disabled={!canManageContent}>
+              <Icon name="builder" size={22} />
+              <span>
+                <strong>Criar novo</strong>
+                <small>Montar um formulário do zero</small>
               </span>
             </button>
           </div>
         </article>
 
         <article className="dashboard-card">
-            <div className="card-heading">
-              <div>
-                <span className="eyebrow">Resumo</span>
-                <h2>Visão geral</h2>
+          <div className="card-heading">
+            <div>
+              <span className="eyebrow">Resumo</span>
+              <h2>Visão geral</h2>
             </div>
           </div>
 
           <div className="summary-list">
-            <MetricCard label="Questionários" value={metrics.counts.total} hint="Modelos cadastrados" icon="library" />
+            <MetricCard label="Formulários" value={metrics.counts.total} hint="Modelos cadastrados" icon="library" />
             <MetricCard label="Respostas" value={metrics.counts.responses} hint="Registros recebidos" icon="users" />
             <MetricCard label="Média geral" value={metrics.averageScore.toFixed(1)} hint="Pontuação média" icon="spark" />
           </div>
         </article>
 
         <article className="dashboard-card">
-            <div className="card-heading">
-              <div>
-                <span className="eyebrow">Questionários</span>
-                <h2>Mais usados</h2>
+          <div className="card-heading">
+            <div>
+              <span className="eyebrow">Mais usados</span>
+              <h2>Formulários em destaque</h2>
             </div>
-              <button className="ghost-button" type="button" onClick={() => onOpenView('biblioteca')}>
+            <button className="ghost-button" type="button" onClick={() => onOpenView('biblioteca')}>
               Abrir biblioteca
-              </button>
+            </button>
           </div>
 
           <div className="simple-list">
             {topQuestionnaires.length === 0 ? (
-              <div className="empty-state small">Nenhum questionário disponível.</div>
+              <div className="empty-state small">Ainda não há formulários cadastrados.</div>
             ) : (
               topQuestionnaires.map((summary) => (
                 <button
                   key={summary.id}
                   type="button"
                   className="simple-list-item"
-                  onClick={() => onOpenView('construtor')}
+                  onClick={() => onOpenView('biblioteca')}
                 >
                   <div>
                     <strong>{summary.title}</strong>
@@ -150,16 +152,16 @@ export default function DashboardPanel({
         </article>
 
         <article className="dashboard-card dashboard-preview-card">
-            <div className="card-heading">
-              <div>
-                <span className="eyebrow">Selecionado</span>
-                <h2>{preview?.title ?? 'Nenhum questionário'}</h2>
-              </div>
-            <span className="status-chip">{preview?.status ?? 'draft'}</span>
+          <div className="card-heading">
+            <div>
+              <span className="eyebrow">Último selecionado</span>
+              <h2>{preview?.title ?? 'Nenhum formulário selecionado'}</h2>
+            </div>
+            <span className="status-chip">{preview?.status ?? 'rascunho'}</span>
           </div>
 
           {preview ? (
-            <div className="preview-copy">
+            <div className="library-detail">
               <p>{preview.subtitle}</p>
               <div className="preview-meta">
                 <span>{preview.domain}</span>
@@ -168,7 +170,7 @@ export default function DashboardPanel({
               </div>
             </div>
           ) : (
-            <div className="empty-state small">Selecione ou crie um questionário para ver detalhes aqui.</div>
+            <div className="empty-state small">Selecione um formulário na biblioteca para ver os detalhes aqui.</div>
           )}
         </article>
       </div>

@@ -6,14 +6,14 @@ export default function QuestionnaireFilters({ query, domain, domains, onChange,
         <input
           value={query}
           onChange={(event) => onChange({ query: event.target.value })}
-          placeholder="Título, pergunta ou tag"
+          placeholder="Procure por título, pergunta ou tema"
         />
       </label>
 
       <label className="field">
-        <span>Domínio</span>
+        <span>Categoria</span>
         <select value={domain} onChange={(event) => onChange({ domain: event.target.value })}>
-          <option value="all">Todos</option>
+          <option value="all">Todas</option>
           {domains.map((item) => (
             <option key={item} value={item}>
               {item}

@@ -8,6 +8,21 @@ function formatDate(dateString) {
   }).format(new Date(dateString));
 }
 
+function ResultMetric({ label, value, hint }) {
+  return (
+    <article className="metric-card">
+      <div className="metric-card-icon">
+        <span className="metric-dot" />
+      </div>
+      <div>
+        <span>{label}</span>
+        <strong>{value}</strong>
+        {hint ? <small>{hint}</small> : null}
+      </div>
+    </article>
+  );
+}
+
 export default function ResultsPanel({ questionnaires, responses }) {
   const metrics = buildDashboardMetrics(questionnaires, responses);
   const recent = responses.slice(0, 5);
@@ -17,104 +32,87 @@ export default function ResultsPanel({ questionnaires, responses }) {
       <div className="panel-header">
         <div>
           <span className="eyebrow">Resultados</span>
-          <h2>Resumo da operação</h2>
-        </div>
-        <div className="header-actions">
-          <button
-            className="ghost-button"
-            type="button"
-            onClick={() => exportQuestionnaireSummaryCsv(questionnaires, responses)}
-          >
-            Exportar resumo CSV
-          </button>
-          <button className="ghost-button" type="button" onClick={() => exportResponsesCsv(questionnaires, responses)}>
-            Exportar respostas CSV
-          </button>
-          <button className="primary-button" type="button" onClick={() => exportSnapshotJson(questionnaires, responses)}>
-            Exportar JSON
-          </button>
-          <button className="ghost-button" type="button" onClick={() => void exportReportPdf(questionnaires, responses)}>
-            Exportar PDF
-          </button>
+          <h2>Resumo rápido</h2>
+          <p>Veja o que já foi respondido e baixe o que precisar.</p>
         </div>
       </div>
 
-      <div className="metrics-grid">
-        <article className="metric-card">
-          <span>Total de questionários</span>
-          <strong>{metrics.counts.total}</strong>
-        </article>
-        <article className="metric-card">
-          <span>Total de respostas</span>
-          <strong>{metrics.counts.responses}</strong>
-        </article>
-        <article className="metric-card">
-          <span>Cobertura</span>
-          <strong>{metrics.coverage}%</strong>
-        </article>
+      <div className="results-actions">
+        <button className="ghost-button" type="button" onClick={() => exportQuestionnaireSummaryCsv(questionnaires, responses)}>
+          Baixar resumo
+        </button>
+        <button className="ghost-button" type="button" onClick={() => exportResponsesCsv(questionnaires, responses)}>
+          Baixar respostas
+        </button>
+        <button className="primary-button" type="button" onClick={() => exportSnapshotJson(questionnaires, responses)}>
+          Baixar JSON
+        </button>
+        <button className="ghost-button" type="button" onClick={() => void exportReportPdf(questionnaires, responses)}>
+          Baixar PDF
+        </button>
       </div>
 
-      <div className="split-grid">
-        <div className="results-card">
+      <div className="metrics-grid compact-metrics">
+        <ResultMetric label="Formulários" value={metrics.counts.total} hint="Modelos cadastrados" />
+        <ResultMetric label="Respostas" value={metrics.counts.responses} hint="Registros recebidos" />
+        <ResultMetric label="Média geral" value={metrics.averageScore.toFixed(1)} hint="Pontuação média" />
+      </div>
+
+      <div className="results-compact-grid">
+        <article className="results-card">
           <div className="section-title">
             <div>
-              <h3>Desempenho por questionário</h3>
-              <p>Visão resumida dos instrumentos cadastrados.</p>
+              <h3>Desempenho</h3>
+              <p>Leitura simples dos formulários mais usados.</p>
             </div>
           </div>
 
-          <div className="result-list">
+          <div className="compact-list">
             {metrics.summaries.length === 0 ? (
-              <div className="empty-state small">Nenhum questionário disponível no momento.</div>
+              <div className="empty-state small">Nenhum formulário disponível.</div>
             ) : (
               metrics.summaries.map((item, index) => (
-                <div key={item.id} className="result-list-item">
-                  <div className="result-rank">
-                    <span>{index + 1}</span>
-                  </div>
-                  <div className="result-copy">
+                <article key={item.id} className="compact-row">
+                  <span className="compact-index">{index + 1}</span>
+                  <div className="compact-copy">
                     <strong>{item.title}</strong>
-                    <span>
-                      {item.relatedCount} respostas · {item.latestBand}
-                    </span>
+                    <span>{item.relatedCount} respostas</span>
                   </div>
-                  <div className="result-chip compact">
+                  <div className="compact-values">
                     <strong>{item.averageScore}</strong>
-                    <span>{item.latestCompletionRate}%</span>
+                    <span>{item.latestBand}</span>
                   </div>
-                </div>
+                </article>
               ))
             )}
           </div>
-        </div>
+        </article>
 
-        <div className="results-card">
+        <article className="results-card">
           <div className="section-title">
             <div>
               <h3>Respostas recentes</h3>
-              <p>Últimos registros recebidos pela plataforma.</p>
+              <p>Os últimos envios aparecem aqui.</p>
             </div>
           </div>
 
-          <div className="recent-list">
+          <div className="compact-list">
             {recent.length === 0 ? (
-              <div className="empty-state small">Nenhuma resposta registrada ainda.</div>
+              <div className="empty-state small">Ainda não há respostas registradas.</div>
             ) : (
               recent.map((response) => {
                 const questionnaire = questionnaires.find((item) => item.id === response.questionnaireId);
                 return (
-                  <article key={response.id} className="recent-item">
-                    <strong>{questionnaire?.title ?? 'Questionário removido'}</strong>
-                    <span>
-                      {response.respondentName || 'Sem nome'} · {response.band} · {response.score} pontos
-                    </span>
-                    <span>{formatDate(response.createdAt)}</span>
+                  <article key={response.id} className="compact-response">
+                    <strong>{questionnaire?.title ?? 'Formulário removido'}</strong>
+                    <span>{response.respondentName || 'Sem nome'} · {response.score} pontos</span>
+                    <small>{formatDate(response.createdAt)}</small>
                   </article>
                 );
               })
             )}
           </div>
-        </div>
+        </article>
       </div>
     </section>
   );
