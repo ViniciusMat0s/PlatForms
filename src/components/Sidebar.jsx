@@ -7,8 +7,6 @@ const navigation = [
   { id: 'resultados', label: 'Resultados', icon: 'results' },
 ];
 
-const flowOrder = ['dashboard', 'biblioteca', 'responder', 'resultados'];
-
 function getInitials(name) {
   if (!name) return 'FP';
   return name
@@ -19,16 +17,7 @@ function getInitials(name) {
     .join('');
 }
 
-function getNextView(activeView) {
-  const index = flowOrder.indexOf(activeView);
-  if (index < 0 || index === flowOrder.length - 1) return flowOrder[0];
-  return flowOrder[index + 1];
-}
-
 export default function Sidebar({ activeView, onChangeView, currentUser, onLogout }) {
-  const nextView = getNextView(activeView);
-  const nextLabel = navigation.find((item) => item.id === nextView)?.label ?? 'Painel';
-
   return (
     <aside className="sidebar">
       <div className="sidebar-top">
@@ -36,17 +25,8 @@ export default function Sidebar({ activeView, onChangeView, currentUser, onLogou
           <span className="brand-mark">FP</span>
           <div>
             <strong>Forms Platform</strong>
-            <small>Fluxo simples e guiado</small>
+            <small>Criar, responder e acompanhar</small>
           </div>
-        </div>
-
-        <div className="step-card">
-          <span className="eyebrow">Próximo passo</span>
-          <strong>{nextLabel}</strong>
-          <p>{activeView === 'dashboard' ? 'Comece pela biblioteca para escolher um formulário.' : 'Use o próximo passo para continuar.'}</p>
-          <button className="primary-button step-button" type="button" onClick={() => onChangeView(nextView)}>
-            Continuar
-          </button>
         </div>
 
         <nav className="nav">

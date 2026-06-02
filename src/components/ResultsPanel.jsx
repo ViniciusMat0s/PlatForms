@@ -25,51 +25,51 @@ function ResultMetric({ label, value, hint }) {
 
 export default function ResultsPanel({ questionnaires, responses }) {
   const metrics = buildDashboardMetrics(questionnaires, responses);
-  const recent = responses.slice(0, 5);
+  const recent = responses.slice(0, 6);
 
   return (
     <section className="panel results-page">
       <div className="panel-header">
         <div>
           <span className="eyebrow">Resultados</span>
-          <h2>Resumo rápido</h2>
-          <p>Veja o que já foi respondido e baixe o que precisar.</p>
+          <h2>Leitura rápida</h2>
+          <p>Veja os números principais e as últimas respostas sem excesso de informação.</p>
         </div>
       </div>
 
       <div className="results-actions">
         <button className="ghost-button" type="button" onClick={() => exportQuestionnaireSummaryCsv(questionnaires, responses)}>
-          Baixar resumo
+          Resumo CSV
         </button>
         <button className="ghost-button" type="button" onClick={() => exportResponsesCsv(questionnaires, responses)}>
-          Baixar respostas
+          Respostas CSV
         </button>
         <button className="primary-button" type="button" onClick={() => exportSnapshotJson(questionnaires, responses)}>
-          Baixar JSON
+          JSON
         </button>
         <button className="ghost-button" type="button" onClick={() => void exportReportPdf(questionnaires, responses)}>
-          Baixar PDF
+          PDF
         </button>
       </div>
 
       <div className="metrics-grid compact-metrics">
-        <ResultMetric label="Formulários" value={metrics.counts.total} hint="Modelos cadastrados" />
-        <ResultMetric label="Respostas" value={metrics.counts.responses} hint="Registros recebidos" />
-        <ResultMetric label="Média geral" value={metrics.averageScore.toFixed(1)} hint="Pontuação média" />
+        <ResultMetric label="Formulários" value={metrics.counts.total} hint="Modelos" />
+        <ResultMetric label="Respostas" value={metrics.counts.responses} hint="Envios" />
+        <ResultMetric label="Média" value={metrics.averageScore.toFixed(1)} hint="Geral" />
       </div>
 
-      <div className="results-compact-grid">
+      <div className="results-stack">
         <article className="results-card">
           <div className="section-title">
             <div>
-              <h3>Desempenho</h3>
-              <p>Leitura simples dos formulários mais usados.</p>
+              <h3>Médias por formulário</h3>
+              <p>Uma visão direta do desempenho de cada modelo.</p>
             </div>
           </div>
 
           <div className="compact-list">
             {metrics.summaries.length === 0 ? (
-              <div className="empty-state small">Nenhum formulário disponível.</div>
+              <div className="empty-state small">Ainda não há formulários cadastrados.</div>
             ) : (
               metrics.summaries.map((item, index) => (
                 <article key={item.id} className="compact-row">
@@ -91,21 +91,23 @@ export default function ResultsPanel({ questionnaires, responses }) {
         <article className="results-card">
           <div className="section-title">
             <div>
-              <h3>Respostas recentes</h3>
-              <p>Os últimos envios aparecem aqui.</p>
+              <h3>Últimas respostas</h3>
+              <p>Os envios mais recentes ficam reunidos aqui.</p>
             </div>
           </div>
 
           <div className="compact-list">
             {recent.length === 0 ? (
-              <div className="empty-state small">Ainda não há respostas registradas.</div>
+              <div className="empty-state small">Nenhuma resposta registrada.</div>
             ) : (
               recent.map((response) => {
                 const questionnaire = questionnaires.find((item) => item.id === response.questionnaireId);
                 return (
                   <article key={response.id} className="compact-response">
                     <strong>{questionnaire?.title ?? 'Formulário removido'}</strong>
-                    <span>{response.respondentName || 'Sem nome'} · {response.score} pontos</span>
+                    <span>
+                      {response.respondentName || 'Sem nome'} · {response.score} pontos
+                    </span>
                     <small>{formatDate(response.createdAt)}</small>
                   </article>
                 );

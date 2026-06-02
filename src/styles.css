@@ -436,6 +436,67 @@ a {
   align-items: start;
 }
 
+.dashboard-slim-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.dashboard-hero {
+  min-height: 100%;
+}
+
+.dashboard-hero-copy {
+  margin: 0.45rem 0 1rem;
+  max-width: 52ch;
+  color: var(--text);
+  line-height: 1.55;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-bottom: 1rem;
+}
+
+.hero-actions .primary-button,
+.hero-actions .ghost-button {
+  min-width: 9.5rem;
+}
+
+.hero-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.dashboard-rail {
+  display: grid;
+  gap: 1rem;
+}
+
+.dashboard-compact {
+  gap: 0.8rem;
+}
+
+.dashboard-mini-copy {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.dashboard-mini-copy strong {
+  color: var(--title);
+  font-size: 1.05rem;
+}
+
+.dashboard-mini-copy p {
+  margin: 0;
+  color: var(--text);
+  line-height: 1.5;
+}
+
 .dashboard-column {
   display: grid;
   gap: 1.2rem;
@@ -985,6 +1046,11 @@ a {
 
 .results-page {
   grid-template-columns: 1fr;
+}
+
+.results-stack {
+  display: grid;
+  gap: 1rem;
 }
 
 .results-actions {
@@ -1579,6 +1645,10 @@ a {
     grid-template-columns: 1fr;
   }
 
+  .dashboard-slim-grid {
+    grid-template-columns: 1fr;
+  }
+
   .library-layout {
     grid-template-columns: 1fr;
   }
@@ -1615,6 +1685,10 @@ a {
   }
 
   .dashboard-simple-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-metrics {
     grid-template-columns: 1fr;
   }
 
