@@ -15,9 +15,9 @@ export default function QuestionnaireRunner({ questionnaire, onSubmit }) {
     return <div className="empty-state">Selecione um questionário para responder.</div>;
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    onSubmit({
+    await onSubmit({
       questionnaireId: questionnaire.id,
       respondentName,
       unit,

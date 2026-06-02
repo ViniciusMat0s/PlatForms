@@ -1,5 +1,5 @@
-import { createQuestionnaireId } from '../lib/scoring';
-import { createBand, createQuestion, createQuestionnaire, createScale } from './questionnaireSchema';
+import { createQuestionnaireId } from '../lib/scoring.js';
+import { createBand, createQuestion, createQuestionnaire, createScale } from './questionnaireSchema.js';
 
 const fivePointLikert = createScale({
   id: 'likert-5',

@@ -1,10 +1,20 @@
-import { useMemo, useState } from 'react';
-import Sidebar from './components/Sidebar';
+import { useEffect, useMemo, useState } from 'react';
+import LoginPanel from './components/LoginPanel';
 import QuestionnaireCard from './components/QuestionnaireCard';
 import QuestionnaireEditor from './components/QuestionnaireEditor';
 import QuestionnaireRunner from './components/QuestionnaireRunner';
 import ResultsPanel from './components/ResultsPanel';
+import Sidebar from './components/Sidebar';
 import { seedQuestionnaires } from './data/seed';
+import {
+  createQuestionnaire as apiCreateQuestionnaire,
+  createResponse as apiCreateResponse,
+  getCurrentUser,
+  getState,
+  login as apiLogin,
+  logout as apiLogout,
+  updateQuestionnaire as apiUpdateQuestionnaire,
+} from './lib/api';
 import { createQuestionnaireId } from './lib/scoring';
 import { loadState, saveState } from './lib/storage';
 
@@ -44,14 +54,15 @@ function createQuestion() {
 }
 
 export default function App() {
-  const [questionnaires, setQuestionnaires] = useState(() =>
-    loadState(QUESTIONNAIRES_KEY, seedQuestionnaires),
-  );
-  const [responses, setResponses] = useState(() => loadState(RESPONSES_KEY, []));
+  const [authStatus, setAuthStatus] = useState('checking');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState('');
+  const [currentUser, setCurrentUser] = useState(null);
+  const [questionnaires, setQuestionnaires] = useState([]);
+  const [responses, setResponses] = useState([]);
   const [activeView, setActiveView] = useState('dashboard');
-  const [selectedQuestionnaireId, setSelectedQuestionnaireId] = useState(
-    () => questionnaires[0]?.id ?? null,
-  );
+  const [selectedQuestionnaireId, setSelectedQuestionnaireId] = useState(null);
+  const [syncStatus, setSyncStatus] = useState('Carregando');
 
   const selectedQuestionnaire = useMemo(
     () => questionnaires.find((item) => item.id === selectedQuestionnaireId) ?? questionnaires[0] ?? null,
@@ -67,21 +78,135 @@ export default function App() {
     [questionnaires.length, responses.length, selectedQuestionnaire],
   );
 
-  const persistQuestionnaires = (nextQuestionnaires) => {
+  const applyState = (nextQuestionnaires, nextResponses) => {
     setQuestionnaires(nextQuestionnaires);
-    saveState(QUESTIONNAIRES_KEY, nextQuestionnaires);
-  };
-
-  const persistResponses = (nextResponses) => {
     setResponses(nextResponses);
+    saveState(QUESTIONNAIRES_KEY, nextQuestionnaires);
     saveState(RESPONSES_KEY, nextResponses);
+    setSelectedQuestionnaireId((current) => current ?? nextQuestionnaires[0]?.id ?? null);
   };
 
-  const updateQuestionnaire = (questionnaireId, nextQuestionnaire) => {
+  const hydrateState = async () => {
+    try {
+      const state = await getState();
+      const nextQuestionnaires = state.questionnaires?.length ? state.questionnaires : seedQuestionnaires;
+      const nextResponses = state.responses ?? [];
+      applyState(nextQuestionnaires, nextResponses);
+      setSyncStatus('Online');
+    } catch {
+      const cachedQuestionnaires = loadState(QUESTIONNAIRES_KEY, seedQuestionnaires);
+      const cachedResponses = loadState(RESPONSES_KEY, []);
+      applyState(cachedQuestionnaires, cachedResponses);
+      setSyncStatus('Offline');
+    }
+  };
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function bootstrap() {
+      const token = window.localStorage.getItem('forms-platform.token');
+      if (!token) {
+        if (!mounted) return;
+        setAuthStatus('signed_out');
+        setSyncStatus('Desconectado');
+        return;
+      }
+
+      try {
+        const user = await getCurrentUser();
+        if (!mounted) return;
+
+        setCurrentUser(user);
+        setAuthStatus('signed_in');
+        await hydrateState();
+      } catch {
+        if (!mounted) return;
+        window.localStorage.removeItem('forms-platform.token');
+        setCurrentUser(null);
+        setAuthStatus('signed_out');
+        setSyncStatus('Desconectado');
+      }
+    }
+
+    bootstrap().finally(() => {
+      if (mounted && authStatus === 'checking') {
+        setAuthStatus((current) => (current === 'checking' ? 'signed_out' : current));
+      }
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedQuestionnaireId && questionnaires[0]?.id) {
+      setSelectedQuestionnaireId(questionnaires[0].id);
+    }
+  }, [questionnaires, selectedQuestionnaireId]);
+
+  const handleLogin = async ({ email, password }) => {
+    setAuthLoading(true);
+    setAuthError('');
+
+    try {
+      const data = await apiLogin(email, password);
+      setCurrentUser(data.user);
+      setAuthStatus('signed_in');
+      await hydrateState();
+      setActiveView('dashboard');
+    } catch (error) {
+      setAuthError(error.message || 'Falha ao entrar.');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await apiLogout();
+    } finally {
+      setCurrentUser(null);
+      setAuthStatus('signed_out');
+      setQuestionnaires([]);
+      setResponses([]);
+      setSelectedQuestionnaireId(null);
+      setActiveView('dashboard');
+      setSyncStatus('Desconectado');
+      setAuthError('');
+    }
+  };
+
+  const persistQuestionnaire = async (questionnaireId, nextQuestionnaire) => {
     const nextQuestionnaires = questionnaires.map((questionnaire) =>
       questionnaire.id === questionnaireId ? nextQuestionnaire : questionnaire,
     );
-    persistQuestionnaires(nextQuestionnaires);
+
+    try {
+      const resolvedQuestionnaire =
+        authStatus === 'signed_in'
+          ? await apiUpdateQuestionnaire(questionnaireId, nextQuestionnaire)
+          : nextQuestionnaire;
+      const resolvedQuestionnaires = questionnaires.map((questionnaire) =>
+        questionnaire.id === questionnaireId ? resolvedQuestionnaire : questionnaire,
+      );
+      setQuestionnaires(resolvedQuestionnaires);
+      saveState(QUESTIONNAIRES_KEY, resolvedQuestionnaires);
+      if (authStatus === 'signed_in') {
+        setSyncStatus('Online');
+      } else {
+        setSyncStatus('Offline');
+      }
+    } catch {
+      setQuestionnaires(nextQuestionnaires);
+      saveState(QUESTIONNAIRES_KEY, nextQuestionnaires);
+      setSyncStatus('Offline');
+    }
+  };
+
+  const updateQuestionnaire = (questionnaireId, nextQuestionnaire) => {
+    void persistQuestionnaire(questionnaireId, nextQuestionnaire);
   };
 
   const addQuestion = (questionnaireId) => {
@@ -90,7 +215,11 @@ export default function App() {
         ? { ...questionnaire, questions: [...questionnaire.questions, createQuestion()] }
         : questionnaire,
     );
-    persistQuestionnaires(nextQuestionnaires);
+
+    const nextQuestionnaire = nextQuestionnaires.find((item) => item.id === questionnaireId);
+    if (nextQuestionnaire) {
+      void persistQuestionnaire(questionnaireId, nextQuestionnaire);
+    }
   };
 
   const removeQuestion = (questionnaireId, questionId) => {
@@ -99,37 +228,90 @@ export default function App() {
         ? { ...questionnaire, questions: questionnaire.questions.filter((question) => question.id !== questionId) }
         : questionnaire,
     );
-    persistQuestionnaires(nextQuestionnaires);
+
+    const nextQuestionnaire = nextQuestionnaires.find((item) => item.id === questionnaireId);
+    if (nextQuestionnaire) {
+      void persistQuestionnaire(questionnaireId, nextQuestionnaire);
+    }
   };
 
-  const createQuestionnaire = () => {
+  const createQuestionnaire = async () => {
     const draft = createBlankQuestionnaire();
-    const nextQuestionnaires = [draft, ...questionnaires];
-    persistQuestionnaires(nextQuestionnaires);
-    setSelectedQuestionnaireId(draft.id);
-    setActiveView('construtor');
+
+    try {
+      const created = authStatus === 'signed_in' ? await apiCreateQuestionnaire(draft) : draft;
+      const resolvedQuestionnaires = [created, ...questionnaires];
+      setQuestionnaires(resolvedQuestionnaires);
+      saveState(QUESTIONNAIRES_KEY, resolvedQuestionnaires);
+      setSelectedQuestionnaireId(created.id);
+      setActiveView('construtor');
+      setSyncStatus(authStatus === 'signed_in' ? 'Online' : 'Offline');
+    } catch {
+      const nextQuestionnaires = [draft, ...questionnaires];
+      setQuestionnaires(nextQuestionnaires);
+      saveState(QUESTIONNAIRES_KEY, nextQuestionnaires);
+      setSelectedQuestionnaireId(draft.id);
+      setActiveView('construtor');
+      setSyncStatus('Offline');
+    }
   };
 
-  const handleResponseSubmit = (payload) => {
-    const next = [
-      {
+  const handleResponseSubmit = async (payload) => {
+    try {
+      const created =
+        authStatus === 'signed_in'
+          ? await apiCreateResponse(payload)
+          : {
+              id: `resp-${Date.now()}`,
+              createdAt: new Date().toISOString(),
+              ...payload,
+            };
+
+      const next = [created, ...responses];
+      setResponses(next);
+      saveState(RESPONSES_KEY, next);
+      setActiveView('resultados');
+      setSyncStatus(authStatus === 'signed_in' ? 'Online' : 'Offline');
+    } catch {
+      const fallback = {
         id: `resp-${Date.now()}`,
         createdAt: new Date().toISOString(),
         ...payload,
-      },
-      ...responses,
-    ];
-    persistResponses(next);
-    setActiveView('resultados');
+      };
+      const next = [fallback, ...responses];
+      setResponses(next);
+      saveState(RESPONSES_KEY, next);
+      setActiveView('resultados');
+      setSyncStatus('Offline');
+    }
   };
+
+  if (authStatus === 'checking') {
+    return (
+      <section className="login-shell">
+        <div className="login-card">
+          <span className="eyebrow">Carregando</span>
+          <h1>Preparando o ambiente</h1>
+          <p>Estamos verificando sua sessão e carregando os dados da plataforma.</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (authStatus === 'signed_out') {
+    return <LoginPanel onLogin={handleLogin} loading={authLoading} error={authError} />;
+  }
 
   return (
     <div className="app-shell">
       <Sidebar
         activeView={activeView}
         onChangeView={setActiveView}
+        onLogout={handleLogout}
+        currentUser={currentUser}
         questionnaireCount={dashboardStats.questionnaireCount}
         responseCount={dashboardStats.responseCount}
+        syncStatus={syncStatus}
       />
 
       <main className="main-content">
@@ -144,12 +326,16 @@ export default function App() {
           </div>
           <div className="hero-stack">
             <div className="hero-card">
+              <span>Usuário</span>
+              <strong>{currentUser?.name ?? 'Desconhecido'}</strong>
+            </div>
+            <div className="hero-card accent">
               <span>Questionário selecionado</span>
               <strong>{selectedQuestionnaire?.title ?? 'Nenhum'}</strong>
             </div>
-            <div className="hero-card accent">
-              <span>Perguntas no selecionado</span>
-              <strong>{dashboardStats.selectedCount}</strong>
+            <div className="hero-card">
+              <span>Sincronização</span>
+              <strong>{syncStatus}</strong>
             </div>
           </div>
         </header>
@@ -178,7 +364,7 @@ export default function App() {
                 </article>
                 <article className="metric-card">
                   <span>Estado</span>
-                  <strong>Base local</strong>
+                  <strong>{syncStatus}</strong>
                 </article>
               </div>
 
