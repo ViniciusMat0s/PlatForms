@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
   color-scheme: light;
@@ -32,7 +32,7 @@ body,
 body {
   margin: 0;
   color: var(--text);
-  font-family: 'Manrope', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   background: #f7f8fb;
   overflow-x: hidden;
 }
@@ -124,7 +124,7 @@ a {
   border-radius: 1rem;
   background: linear-gradient(135deg, #ff8f1f, #ffb24d);
   color: #fff;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-weight: 800;
   box-shadow: 0 12px 26px rgba(255, 143, 31, 0.24);
 }
@@ -135,7 +135,7 @@ a {
 .section-title h3,
 .login-card h1,
 .dashboard-card h2 {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Outfit', sans-serif;
 }
 
 .brand small,
@@ -277,7 +277,7 @@ a {
   margin-top: 0.3rem;
   color: #fff;
   font-size: 1rem;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Outfit', sans-serif;
 }
 
 .logout-button {
@@ -314,7 +314,7 @@ a {
 .workspace-header h1 {
   margin: 0.25rem 0 0;
   color: var(--title);
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: clamp(1.55rem, 2vw, 2.2rem);
   line-height: 1;
 }
@@ -357,8 +357,8 @@ a {
 
 .summary-chip strong {
   color: var(--title);
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.1rem;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
 }
 
 .summary-chip.muted {
@@ -391,7 +391,7 @@ a {
 .table-shell-title h2 {
   margin: 0;
   color: var(--title);
-  font-size: 1.1rem;
+  font-size: 0.95rem;
 }
 
 .table-shell-title span {
@@ -510,7 +510,7 @@ a {
 
 .workspace-preview strong {
   color: var(--title);
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 1rem;
 }
 
@@ -630,7 +630,7 @@ a {
 
 .dashboard-intro h1 {
   margin: 0.3rem 0 0;
-  font-size: clamp(1.6rem, 2.3vw, 2.3rem);
+  font-size: clamp(1.45rem, 2vw, 2rem);
   line-height: 0.95;
 }
 
@@ -902,8 +902,8 @@ a {
 
 .feature-score strong {
   color: var(--title);
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.55rem;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.2rem;
   line-height: 1;
 }
 
@@ -989,8 +989,8 @@ a {
   display: block;
   margin-top: 0.2rem;
   color: var(--title);
-  font-size: 1.1rem;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
 }
 
 .mini-metrics-grid {
@@ -1049,8 +1049,8 @@ a {
   display: block;
   margin-top: 0.25rem;
   color: var(--title);
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.1rem;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
   line-height: 1;
 }
 
@@ -1420,7 +1420,7 @@ a {
 
 .questionnaire-card h3 {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   color: var(--title);
 }
 
@@ -1523,8 +1523,8 @@ a {
 
 .compact-values strong {
   color: var(--title);
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.15rem;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
 }
 
 .compact-response {
@@ -1571,7 +1571,7 @@ a {
   display: block;
   margin-top: 0.15rem;
   color: var(--title);
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Outfit', sans-serif;
 }
 
 .runner-track {
@@ -1630,7 +1630,7 @@ a {
 .result-chip strong {
   color: var(--title);
   font-size: 1rem;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Outfit', sans-serif;
 }
 
 .result-chip span {
@@ -1869,7 +1869,7 @@ a {
 
 .login-card h1 {
   margin: 0.35rem 0 0.75rem;
-  font-size: clamp(1.65rem, 3vw, 2.2rem);
+  font-size: clamp(1.45rem, 2.2vw, 1.95rem);
 }
 
 .login-card p {
