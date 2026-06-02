@@ -239,6 +239,13 @@ button {
   gap: 1rem;
 }
 
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
 .panel-header {
   margin-bottom: 1rem;
 }

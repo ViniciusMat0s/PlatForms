@@ -1,4 +1,9 @@
 import { scoreQuestionnaire } from '../lib/scoring';
+import {
+  exportQuestionnaireSummaryCsv,
+  exportResponsesCsv,
+  exportSnapshotJson,
+} from '../lib/export';
 
 function formatDate(dateString) {
   return new Intl.DateTimeFormat('pt-BR', {
@@ -37,7 +42,29 @@ export default function ResultsPanel({ questionnaires, responses }) {
           <span className="eyebrow">Resultados</span>
           <h2>Resumo da operação</h2>
         </div>
-        <span className="badge">Armazenamento local</span>
+        <div className="header-actions">
+          <button
+            className="ghost-button"
+            type="button"
+            onClick={() => exportQuestionnaireSummaryCsv(questionnaires, responses)}
+          >
+            Exportar resumo CSV
+          </button>
+          <button
+            className="ghost-button"
+            type="button"
+            onClick={() => exportResponsesCsv(questionnaires, responses)}
+          >
+            Exportar respostas CSV
+          </button>
+          <button
+            className="primary-button"
+            type="button"
+            onClick={() => exportSnapshotJson(questionnaires, responses)}
+          >
+            Exportar JSON
+          </button>
+        </div>
       </div>
 
       <div className="metrics-grid">
