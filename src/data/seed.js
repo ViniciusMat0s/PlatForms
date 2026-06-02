@@ -11,6 +11,11 @@ const threePointFrequency = createScale({
   labels: ['Quase sempre', 'Quase nunca', 'Raramente'],
 });
 
+const resilienceScale = createScale({
+  id: 'resilience-5',
+  labels: ['Concordo Totalmente', 'Concordo Pouco', 'Discordo Muito', 'Discordo Pouco', 'Discordo Totalmente'],
+});
+
 const defaultBands = [
   createBand(0, 19, 'Muito baixo'),
   createBand(20, 39, 'Baixo'),
@@ -91,6 +96,35 @@ export const seedQuestionnaires = [
       q('cc-11', 'Procuro notar oportunidades de apreciar pequenos momentos em que vejo, sinto e ouço algo agradável e especial.'),
       q('cc-12', 'Tenho o hábito de agradecer o gesto de valor de alguém para comigo.'),
       q('cc-13', 'Procuro me tratar com carinho e respeito.'),
+    ],
+  }),
+  createQuestionnaire({
+    id: createQuestionnaireId('Protocolo de Resiliência'),
+    code: 'protocolo-de-resiliencia',
+    title: 'Protocolo de Resiliência',
+    subtitle: 'Avalia adaptação, persistência e capacidade de lidar com desafios.',
+    audience: 'Adulto',
+    domain: 'Desenvolvimento pessoal',
+    source: 'Documento enviado pelo usuário',
+    status: 'active',
+    tags: ['resiliencia', 'desenvolvimento-pessoal'],
+    scale: resilienceScale,
+    bands: defaultBands,
+    scoring: { type: 'mean_scaled', reverseQuestions: [] },
+    questions: [
+      q('rs-1', 'Sinto que consigo lidar com várias coisas ao mesmo tempo'),
+      q('rs-2', 'A confiança em mim próprio(a) ajuda-me a lidar com tempos difíceis?'),
+      q('rs-3', 'Normalmente consigo olhar para uma situação com várias perspectivas?'),
+      q('rs-4', 'Quando estou numa situação difícil, normalmente consigo encontrar uma solução?'),
+      q('rs-5', 'Tenho energia suficiente para fazer o que deve ser feito?'),
+      q('rs-6', 'Manter-me interessado(a) nas atividades do dia a dia é importante para mim?'),
+      q('rs-7', 'Sinto-me orgulhosa(o) por ter alcançado objetivos na minha vida?'),
+      q('rs-8', 'Sou determinado(a).'),
+      q('rs-9', 'Mantenho-me interessado(a) nas coisas'),
+      q('rs-10', 'A minha vida tem um propósito.'),
+      q('rs-11', 'Vivo um dia de cada vez'),
+      q('rs-12', 'Eu não fico obcecado(a) com coisas que não posso resolver.'),
+      q('rs-13', 'Sou capaz de depender de mim próprio(a) do que qualquer outra pessoa.'),
     ],
   }),
 ];
