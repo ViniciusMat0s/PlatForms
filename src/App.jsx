@@ -355,9 +355,6 @@ export default function App() {
         onChangeView={setActiveView}
         onLogout={handleLogout}
         currentUser={currentUser}
-        questionnaireCount={questionnaires.length}
-        responseCount={responses.length}
-        syncStatus={syncStatus}
       />
 
       <main className="main-content">
@@ -368,9 +365,6 @@ export default function App() {
             responses={responses}
             selectedQuestionnaire={selectedQuestionnaire}
             selectedQuestionnaireId={selectedQuestionnaireId}
-            query={questionnaireQuery}
-            onQueryChange={setQuestionnaireQuery}
-            onSelectQuestionnaire={setSelectedQuestionnaireId}
             onCreateQuestionnaire={createQuestionnaire}
             onOpenView={setActiveView}
             canManageContent={canManageContent}

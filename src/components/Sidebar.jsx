@@ -1,9 +1,9 @@
 import Icon from './Icon';
 
 const navigation = [
-  { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
+  { id: 'dashboard', label: 'Painel', icon: 'dashboard' },
   { id: 'biblioteca', label: 'Biblioteca', icon: 'library' },
-  { id: 'construtor', label: 'Construtor', icon: 'builder' },
+  { id: 'construtor', label: 'Editar', icon: 'builder' },
   { id: 'responder', label: 'Responder', icon: 'runner' },
   { id: 'resultados', label: 'Resultados', icon: 'results' },
 ];
@@ -21,9 +21,6 @@ function getInitials(name) {
 export default function Sidebar({
   activeView,
   onChangeView,
-  questionnaireCount,
-  responseCount,
-  syncStatus,
   currentUser,
   onLogout,
 }) {
@@ -61,21 +58,6 @@ export default function Sidebar({
           <div>
             <strong>{currentUser ? currentUser.name : 'Sem sessão'}</strong>
             <span>{currentUser ? currentUser.role : 'Desconectado'}</span>
-          </div>
-        </div>
-
-        <div className="stat-grid">
-          <div className="stat-pill">
-            <span>Questionários</span>
-            <strong>{questionnaireCount}</strong>
-          </div>
-          <div className="stat-pill">
-            <span>Respostas</span>
-            <strong>{responseCount}</strong>
-          </div>
-          <div className="stat-pill">
-            <span>Sincronização</span>
-            <strong>{syncStatus}</strong>
           </div>
         </div>
 
