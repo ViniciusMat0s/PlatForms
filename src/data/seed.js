@@ -31,6 +31,11 @@ const selfEsteemScale = createScale({
   labels: ['1', '2', '3', '4'],
 });
 
+const satisfactionScale = createScale({
+  id: 'satisfaction-4',
+  labels: ['1', '2', '3', '4'],
+});
+
 const engagementScale = createScale({
   id: 'engagement-5',
   labels: ['1', '2', '3', '4', '5'],
@@ -244,6 +249,27 @@ export const seedQuestionnaires = [
       q('pv-8', 'Não me dou o devido valor. Gostaria de ter mais respeito por mim.', true),
       q('pv-9', 'Quase sempre estou inclinado(a) a achar que sou um fracasso.', true),
       q('pv-10', 'Eu tenho uma atitude positiva (sentimentos, ações) em relação a mim mesmo(a)'),
+    ],
+  }),
+  createQuestionnaire({
+    id: createQuestionnaireId('Avalie sua Satisfação de Vida'),
+    code: 'avalie-sua-satisfacao-de-vida',
+    title: 'Avalie sua Satisfação de Vida',
+    subtitle: 'Avalia a percepção geral sobre a própria vida.',
+    audience: 'Adulto',
+    domain: 'Bem-estar',
+    source: 'Documento enviado pelo usuário',
+    status: 'active',
+    tags: ['satisfacao-de-vida', 'bem-estar'],
+    scale: satisfactionScale,
+    bands: defaultBands,
+    scoring: { type: 'mean_scaled', reverseQuestions: [] },
+    questions: [
+      q('sv-1', 'A minha vida está próxima do meu ideal'),
+      q('sv-2', 'Minha condições de vida são excelentes'),
+      q('sv-3', 'Eu estou satisfeito(a) com a minha vida'),
+      q('sv-4', 'Agora eu tenho conseguido as coisas importantes que considero na vida'),
+      q('sv-5', 'Se eu pudesse viver minha vida de novo, eu não mudaria quase nada'),
     ],
   }),
   createQuestionnaire({
