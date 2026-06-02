@@ -459,3 +459,19 @@ export async function writeDatabase(nextDatabase) {
   const db = openSqliteDatabase();
   replaceSqliteDatabase(db, nextDatabase);
 }
+
+export async function ensureDefaultAdminUser() {
+  const db = await readDatabase();
+  const hasAdmin = db.users.some(
+    (user) =>
+      user.id === adminUserSeed.id ||
+      (String(user.email ?? '').toLowerCase() === adminUserSeed.email && user.role === 'admin'),
+  );
+
+  if (hasAdmin) {
+    return;
+  }
+
+  db.users = mergeUsers(db.users ?? [], [adminUserSeed]);
+  await writeDatabase(db);
+}
