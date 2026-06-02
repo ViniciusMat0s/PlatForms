@@ -26,6 +26,11 @@ const agreementLikert = createScale({
   labels: ['Discordo totalmente', 'Discordo', 'Nem concordo nem discordo', 'Concordo', 'Concordo totalmente'],
 });
 
+const curtiogramaScale = createScale({
+  id: 'curtiograma-4',
+  labels: ['Gosto e Faço', 'Gosto e Não Faço', 'Não Gosto e Faço', 'Não Gosto e Não Faço'],
+});
+
 function q(id, text, reverse = false, dimension = 'geral') {
   return createQuestion({ id, text, reverse, dimension });
 }
@@ -383,6 +388,23 @@ export const extraQuestionnaires = [
       q('wh-8', 'Percebo que faço duas ou três coisas ao mesmo tempo, tais como almoçar e tomar notas, enquanto falo ao telefone'),
       q('wh-9', 'Sinto-me culpado quando tiro folga no trabalho'),
       q('wh-10', 'É difícil relaxar quando não estou trabalhando'),
+    ],
+  }),
+  createQuestionnaire({
+    id: createQuestionnaireId('Curtiograma / Autoconhecimento'),
+    code: 'curtiograma-autoconhecimento',
+    title: 'Curtiograma / Autoconhecimento',
+    subtitle: 'Exercício de autoconhecimento com os quatro quadrantes do levantamento.',
+    audience: 'Adulto',
+    domain: 'Autoconhecimento',
+    source: 'Documento de levantamento enviado pelo usuário',
+    status: 'active',
+    tags: ['autoconhecimento', 'curtiograma'],
+    scale: curtiogramaScale,
+    bands: defaultBands(),
+    scoring: { type: 'mean_scaled', reverseQuestions: [] },
+    questions: [
+      q('cg-1', 'Classifique o seu padrão de acordo com as opções abaixo'),
     ],
   }),
 ];
