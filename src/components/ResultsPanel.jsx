@@ -12,6 +12,7 @@ export default function ResultsPanel({ questionnaires, responses }) {
 
   const summaries = questionnaires.map((questionnaire) => {
     const related = responses.filter((response) => response.questionnaireId === questionnaire.id);
+    const latest = related[0] ? scoreQuestionnaire(questionnaire, related[0].answers) : null;
     const averageScore =
       related.length === 0
         ? 0
@@ -24,6 +25,8 @@ export default function ResultsPanel({ questionnaires, responses }) {
       ...questionnaire,
       relatedCount: related.length,
       averageScore,
+      latestBand: latest?.band ?? 'Sem dados',
+      latestCompletionRate: latest?.completionRate ?? 0,
     };
   });
 
@@ -60,11 +63,13 @@ export default function ResultsPanel({ questionnaires, responses }) {
               <div key={item.id} className="result-list-item">
                 <div>
                   <strong>{item.title}</strong>
-                  <span>{item.relatedCount} respostas</span>
+                  <span>
+                    {item.relatedCount} respostas · {item.latestBand}
+                  </span>
                 </div>
                 <div className="result-chip compact">
                   <strong>{item.averageScore}</strong>
-                  <span>média</span>
+                  <span>{item.latestCompletionRate}%</span>
                 </div>
               </div>
             ))}
@@ -82,7 +87,9 @@ export default function ResultsPanel({ questionnaires, responses }) {
                 return (
                   <article key={response.id} className="recent-item">
                     <strong>{questionnaire?.title ?? 'Questionário removido'}</strong>
-                    <span>{response.respondentName || 'Sem nome'}</span>
+                    <span>
+                      {response.respondentName || 'Sem nome'} · {response.band} · {response.score} pontos
+                    </span>
                     <span>{formatDate(response.createdAt)}</span>
                   </article>
                 );

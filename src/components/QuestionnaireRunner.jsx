@@ -9,6 +9,7 @@ export default function QuestionnaireRunner({ questionnaire, onSubmit }) {
   const [submitted, setSubmitted] = useState(false);
 
   const result = useMemo(() => scoreQuestionnaire(questionnaire, answers), [answers, questionnaire]);
+  const hasDimensions = result.dimensions.length > 0;
 
   if (!questionnaire) {
     return <div className="empty-state">Selecione um questionário para responder.</div>;
@@ -96,8 +97,40 @@ export default function QuestionnaireRunner({ questionnaire, onSubmit }) {
           Salvar resposta
         </button>
         <span className="hint">
-          {submitted ? 'Resposta salva localmente.' : `${result.answered}/${result.total} perguntas respondidas`}
+          {submitted
+            ? 'Resposta salva localmente.'
+            : `${result.answered}/${result.total} perguntas respondidas`}
         </span>
+      </div>
+
+      <div className="results-card runner-summary">
+        <div className="section-title">
+          <div>
+            <h3>Resumo parcial</h3>
+            <p>
+              {result.completionRate}% concluído · média {result.score} · faixa {result.band}
+            </p>
+          </div>
+        </div>
+
+        {hasDimensions ? (
+          <div className="result-list">
+            {result.dimensions.map((dimension) => (
+              <div key={dimension.dimension} className="result-list-item">
+                <div>
+                  <strong>{dimension.dimension}</strong>
+                  <span>{dimension.answered} respostas</span>
+                </div>
+                <div className="result-chip compact">
+                  <strong>{dimension.score}</strong>
+                  <span>média</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="empty-state small">As dimensões aparecerão conforme as respostas forem preenchidas.</div>
+        )}
       </div>
     </form>
   );
