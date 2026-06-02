@@ -120,13 +120,13 @@ export default function DashboardPanel({
                 {readerMode ? null : <th>Respostas</th>}
                 {readerMode ? null : <th>Média</th>}
                 <th>Público</th>
-                <th />
+                {readerMode ? null : <th />}
               </tr>
             </thead>
             <tbody>
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={readerMode ? 4 : 7}>
+                  <td colSpan={readerMode ? 3 : 7}>
                     <div className="empty-state small">Nenhum formulário encontrado.</div>
                   </td>
                 </tr>
@@ -137,7 +137,25 @@ export default function DashboardPanel({
                     <tr
                       key={questionnaire.id}
                       className={questionnaire.id === selectedQuestionnaireId ? 'selected' : ''}
-                      onClick={() => onSelectQuestionnaire(questionnaire.id)}
+                      onClick={() => {
+                        if (readerMode) {
+                          onStartQuestionnaire?.(questionnaire.id);
+                          return;
+                        }
+
+                        onSelectQuestionnaire(questionnaire.id);
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key !== 'Enter' && event.key !== ' ') return;
+                        event.preventDefault();
+                        if (readerMode) {
+                          onStartQuestionnaire?.(questionnaire.id);
+                        } else {
+                          onSelectQuestionnaire(questionnaire.id);
+                        }
+                      }}
+                      tabIndex={0}
+                      role="button"
                     >
                       <td>
                         <strong>{questionnaire.title}</strong>
@@ -152,16 +170,16 @@ export default function DashboardPanel({
                       {readerMode ? null : <td>{summary?.relatedCount ?? 0}</td>}
                       {readerMode ? null : <td>{summary?.averageScore ?? '0.0'}</td>}
                       <td>{questionnaire.audience}</td>
-                      <td className="table-actions">
-                        <button className="icon-button" type="button" onClick={() => onStartQuestionnaire?.(questionnaire.id)}>
-                          <Icon name="runner" size={16} />
-                        </button>
-                        {readerMode ? null : (
+                      {readerMode ? null : (
+                        <td className="table-actions">
+                          <button className="icon-button" type="button" onClick={() => onStartQuestionnaire?.(questionnaire.id)}>
+                            <Icon name="runner" size={16} />
+                          </button>
                           <button className="icon-button" type="button" onClick={() => onOpenView('construtor')}>
                             <Icon name="builder" size={16} />
                           </button>
-                        )}
-                      </td>
+                        </td>
+                      )}
                     </tr>
                   );
                 })
