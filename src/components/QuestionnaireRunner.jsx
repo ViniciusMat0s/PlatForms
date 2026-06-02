@@ -7,7 +7,22 @@ export default function QuestionnaireRunner({ questionnaire, onSubmit }) {
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
 
-  const result = useMemo(() => scoreQuestionnaire(questionnaire, answers), [answers, questionnaire]);
+  const result = useMemo(
+    () =>
+      questionnaire
+        ? scoreQuestionnaire(questionnaire, answers)
+        : {
+            answered: 0,
+            total: 0,
+            completionRate: 0,
+            average: 0,
+            score: 0,
+            band: 'Sem respostas',
+            dimensions: [],
+            items: [],
+          },
+    [answers, questionnaire],
+  );
 
   if (!questionnaire) {
     return <div className="empty-state">Escolha um formulário para responder.</div>;
@@ -69,14 +84,14 @@ export default function QuestionnaireRunner({ questionnaire, onSubmit }) {
       </div>
 
       <div className="question-stack">
-        {questionnaire.questions.map((question, index) => (
+        {(questionnaire.questions ?? []).map((question, index) => (
           <article key={question.id} className="question-card">
             <div className="question-heading">
               <span className="question-index">{index + 1}</span>
               <p>{question.text}</p>
             </div>
             <div className="answers-row">
-              {questionnaire.scale.labels.map((label, value) => (
+              {(questionnaire.scale?.labels ?? []).map((label, value) => (
                 <label key={`${question.id}-${value}`} className="answer-option">
                   <input
                     type="radio"
