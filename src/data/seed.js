@@ -1,5 +1,6 @@
 import { createQuestionnaireId } from '../lib/scoring.js';
 import { createBand, createQuestion, createQuestionnaire, createScale } from './questionnaireSchema.js';
+import { extraQuestionnaires } from './questionnaireExtras.js';
 
 const fivePointLikert = createScale({
   id: 'likert-5',
@@ -9,6 +10,21 @@ const fivePointLikert = createScale({
 const agreementLikert = createScale({
   id: 'agreement-5',
   labels: ['Discordo totalmente', 'Discordo', 'Nem concordo nem discordo', 'Concordo', 'Concordo totalmente'],
+});
+
+const fourPointLikert = createScale({
+  id: 'likert-4',
+  labels: ['Nunca', 'Raramente', 'Frequentemente', 'Sempre'],
+});
+
+const fourPointAgreement = createScale({
+  id: 'agreement-4',
+  labels: ['Discordo plenamente', 'Discordo', 'Concordo', 'Concordo plenamente'],
+});
+
+const threePointFrequency = createScale({
+  id: 'frequency-3',
+  labels: ['Raramente', 'Às vezes', 'Quase sempre'],
 });
 
 function q(id, text, reverse = false, dimension = 'geral') {
@@ -136,4 +152,5 @@ export const seedQuestionnaires = [
       q('ae-5', 'Administrar meu tempo em relação às minhas funções no trabalho'),
     ],
   }),
+  ...extraQuestionnaires,
 ];
