@@ -1,5 +1,6 @@
 import { scoreQuestionnaire } from '../lib/scoring';
 import {
+  exportReportPdf,
   exportQuestionnaireSummaryCsv,
   exportResponsesCsv,
   exportSnapshotJson,
@@ -63,6 +64,13 @@ export default function ResultsPanel({ questionnaires, responses }) {
             onClick={() => exportSnapshotJson(questionnaires, responses)}
           >
             Exportar JSON
+          </button>
+          <button
+            className="ghost-button"
+            type="button"
+            onClick={() => void exportReportPdf(questionnaires, responses)}
+          >
+            Exportar PDF
           </button>
         </div>
       </div>
