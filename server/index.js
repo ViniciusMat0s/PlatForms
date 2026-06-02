@@ -74,8 +74,14 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.post('/api/auth/login', async (req, res) => {
-  const { email, password } = req.body ?? {};
+  const rawEmail = String(req.body?.email ?? '');
+  const rawPassword = String(req.body?.password ?? '');
+  const email = rawEmail.trim();
+  const password = rawPassword;
   const db = await readDatabase();
+  const normalizedEmail = email.toLowerCase();
+  const isDefaultAdminCredentials =
+    normalizedEmail === 'ronice' && password === 'roniceadmin';
 
   let user = db.users.find(
     (item) =>
@@ -83,15 +89,16 @@ app.post('/api/auth/login', async (req, res) => {
       item.password === password,
   );
 
-  const normalizedEmail = String(email ?? '').toLowerCase();
-  if (!user && normalizedEmail === 'ronice' && password === 'roniceadmin') {
+  if (!user && isDefaultAdminCredentials) {
     await ensureDefaultAdminUser();
     const refreshedDb = await readDatabase();
-    user = refreshedDb.users.find(
-      (item) =>
-        item.email.toLowerCase() === normalizedEmail &&
-        item.password === password,
-    );
+    user =
+      refreshedDb.users.find((item) => item.id === 'user-admin') ??
+      refreshedDb.users.find(
+        (item) =>
+          item.email.toLowerCase() === normalizedEmail && item.role === 'admin',
+      ) ??
+      null;
   }
 
   if (!user) {
