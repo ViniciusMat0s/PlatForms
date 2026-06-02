@@ -10,6 +10,8 @@ npm start
 
 Depois disso a aplicação fica disponível em `http://localhost:3001` e a API em `http://localhost:3001/api`.
 
+O banco interno é criado automaticamente em `server/data/forms.sqlite`. Se quiser fazer backup, basta copiar esse arquivo.
+
 ## Docker
 
 ```bash

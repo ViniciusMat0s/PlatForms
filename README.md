@@ -2,6 +2,12 @@
 
 Base inicial de uma plataforma de formulários e questionários em React + Vite.
 
+## Armazenamento
+
+- O banco interno fica em `server/data/forms.sqlite`
+- O arquivo é criado automaticamente na primeira execução
+- Se existir um `server/data/db.json` antigo, ele é importado para o SQLite na inicialização
+
 ## Rodar localmente
 
 ```bash
@@ -19,6 +25,7 @@ npm run dev
 - Construtor simples para editar título, escala e perguntas
 - Tela de resposta com cálculo básico de resultado
 - Painel com respostas recentes e métricas locais
+- Persistência interna em SQLite para uso local
 - Modelo formal dos questionários em `src/data/questionnaireSchema.js`
 - Roadmap do produto em `docs/roadmap.md`
 

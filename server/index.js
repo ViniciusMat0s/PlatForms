@@ -193,15 +193,15 @@ app.post('/api/responses', async (req, res) => {
   const auth = await findSession(req);
   const response = {
     id: `resp-${crypto.randomUUID()}`,
-      createdAt: new Date().toISOString(),
-      submittedByUserId: auth?.user?.id ?? null,
-      submittedByRole: auth?.user?.role ?? 'public',
-      ...payload,
-    };
+    createdAt: new Date().toISOString(),
+    submittedByUserId: auth?.user?.id ?? null,
+    submittedByRole: auth?.user?.role ?? 'public',
+    ...payload,
+  };
 
-    db.responses = [response, ...db.responses];
-    await writeDatabase(db);
-    res.status(201).json(response);
+  db.responses = [response, ...db.responses];
+  await writeDatabase(db);
+  res.status(201).json(response);
 });
 
 app.get(
