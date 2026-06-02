@@ -31,7 +31,7 @@ function getSelectedQuestionnaire(questionnaires, selectedQuestionnaireId) {
 }
 
 function getDefaultViewForRole(role) {
-  return role === 'admin' ? 'dashboard' : 'responder';
+  return role === 'admin' ? 'dashboard' : 'biblioteca';
 }
 
 export default function App() {
