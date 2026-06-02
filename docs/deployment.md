@@ -12,6 +12,14 @@ Depois disso a aplicação fica disponível em `http://localhost:3001` e a API e
 
 O banco interno é criado automaticamente em `server/data/forms.sqlite`. Se quiser fazer backup, basta copiar esse arquivo.
 
+## Vercel
+
+- O frontend pode ser publicado normalmente como app estático.
+- A API roda em função serverless dentro de [`api/[...path].js`](/c:/Users/kod4s/OneDrive/Desktop/Projetos/Forms/api/[...path].js).
+- Antes de publicar, conecte uma integração de Postgres no projeto da Vercel para que a persistência funcione.
+- A aplicação usa a integração quando encontra `POSTGRES_URL`, `POSTGRES_URL_NON_POOLING`, `DATABASE_URL` ou `VERCEL_POSTGRES_URL`.
+- Sem um banco conectado, o deploy na Vercel não terá armazenamento persistente.
+
 ## Docker
 
 ```bash

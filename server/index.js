@@ -3,6 +3,7 @@ import express from 'express';
 import crypto from 'node:crypto';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { readDatabase, writeDatabase } from './db.js';
 
 const app = express();
@@ -235,6 +236,12 @@ app.use((error, _req, res, _next) => {
   res.status(500).json({ error: 'Erro interno do servidor.' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Forms API running on http://localhost:${PORT}`);
-});
+export { app };
+
+const isDirectRun = process.argv[1] ? fileURLToPath(import.meta.url) === path.resolve(process.argv[1]) : false;
+
+if (isDirectRun && process.env.VERCEL !== '1') {
+  app.listen(PORT, () => {
+    console.log(`Forms API running on http://localhost:${PORT}`);
+  });
+}

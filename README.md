@@ -18,6 +18,7 @@ npm run dev
 ## Deploy
 
 - Veja [`docs/deployment.md`](./docs/deployment.md) para `npm start` e Docker.
+- Para subir na Vercel, conecte uma integração de Postgres no projeto antes do deploy.
 
 ## O que já existe
 
