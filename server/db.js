@@ -21,6 +21,13 @@ function clone(value) {
 
 const canonicalQuestionnaires = [...seedQuestionnaires];
 const canonicalQuestionnaireIds = new Set(canonicalQuestionnaires.map((questionnaire) => questionnaire.id));
+const adminUserSeed = {
+  id: 'user-admin',
+  name: 'Ronice',
+  email: 'ronice',
+  password: 'roniceadmin',
+  role: 'admin',
+};
 
 function normalizeRole(role) {
   if (role === 'admin') return role;
@@ -40,15 +47,7 @@ function createSeedDb() {
       },
     })),
     responses: [],
-    users: [
-      {
-        id: 'user-admin',
-        name: 'Ronice',
-        email: 'ronice',
-        password: 'roniceadmin',
-        role: 'admin',
-      },
-    ],
+    users: [adminUserSeed],
     sessions: [],
   };
 }
@@ -104,10 +103,14 @@ function mergeUsers(existingUsers, defaultUsers) {
   return Array.from(map.values());
 }
 
+function buildCanonicalUsers(existingUsers = []) {
+  return mergeUsers(existingUsers, [adminUserSeed]);
+}
+
 function normalizeDatabase(db) {
   const seed = createSeedDb();
   const questionnaires = normalizeQuestionnaires(db.questionnaires ?? seed.questionnaires);
-  const users = mergeUsers(db.users ?? [], seed.users);
+  const users = buildCanonicalUsers(db.users ?? []);
   const responses = Array.isArray(db.responses)
     ? db.responses.filter((response) => canonicalQuestionnaireIds.has(response.questionnaireId))
     : [];
@@ -327,6 +330,29 @@ async function initializePostgresSchema(sql) {
   `;
 }
 
+async function ensureCanonicalPostgresState(sql) {
+  for (const [ordinal, questionnaire] of canonicalQuestionnaires.entries()) {
+    await sql`
+      INSERT INTO questionnaires (id, ordinal, payload)
+      VALUES (${questionnaire.id}, ${ordinal}, ${JSON.stringify(questionnaire)})
+      ON CONFLICT (id) DO UPDATE SET
+        ordinal = excluded.ordinal,
+        payload = excluded.payload
+    `;
+  }
+
+  await sql`
+    INSERT INTO users (id, ordinal, name, email, password, role)
+    VALUES (${adminUserSeed.id}, 0, ${adminUserSeed.name}, ${adminUserSeed.email}, ${adminUserSeed.password}, ${adminUserSeed.role})
+    ON CONFLICT (id) DO UPDATE SET
+      ordinal = excluded.ordinal,
+      name = excluded.name,
+      email = excluded.email,
+      password = excluded.password,
+      role = excluded.role
+  `;
+}
+
 async function loadPostgresDatabase() {
   const sql = await getPostgresSql();
   const [questionnairesResult, responsesResult, usersResult, sessionsResult] = await Promise.all([
@@ -336,12 +362,12 @@ async function loadPostgresDatabase() {
     sql`SELECT id, userId, createdAt FROM sessions ORDER BY ordinal ASC`,
   ]);
 
-  return {
+  return normalizeDatabase({
     questionnaires: questionnairesResult.rows.map((row) => JSON.parse(row.payload)),
     responses: responsesResult.rows.map((row) => JSON.parse(row.payload)),
     users: usersResult.rows,
     sessions: sessionsResult.rows,
-  };
+  });
 }
 
 async function replacePostgresDatabase(nextDatabase) {
@@ -392,11 +418,7 @@ async function ensurePostgresInitialized() {
     postgresInitializationPromise = (async () => {
       const sql = await getPostgresSql();
       await initializePostgresSchema(sql);
-
-      const countResult = await sql`SELECT COUNT(*)::int AS count FROM questionnaires`;
-      if ((countResult.rows[0]?.count ?? 0) === 0) {
-        await replacePostgresDatabase(createSeedDb());
-      }
+      await ensureCanonicalPostgresState(sql);
     })();
   }
 
