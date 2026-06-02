@@ -9,13 +9,13 @@ export default function QuestionnaireCard({ questionnaire, isSelected, onSelect 
     >
       <div className="card-topline">
         <span>{domain}</span>
-        <span>{audience}</span>
+        <span>{questionnaire.status ?? 'draft'}</span>
       </div>
       <h3>{title}</h3>
       <p>{subtitle}</p>
       <div className="card-meta">
+        <span>{audience}</span>
         <span>{questions.length} perguntas</span>
-        <span>{questionnaire.scale.labels.length} opções</span>
       </div>
     </button>
   );

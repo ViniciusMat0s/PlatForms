@@ -372,44 +372,82 @@ export default function App() {
         )}
 
         {activeView === 'biblioteca' && (
-          <section className="panel">
-            <div className="panel-header">
-              <div>
-                <span className="eyebrow">Biblioteca</span>
-                <h2>Modelos disponíveis</h2>
+          <section className="library-layout">
+            <article className="panel library-panel">
+              <div className="panel-header">
+                <div>
+                  <span className="eyebrow">Biblioteca</span>
+                  <h2>Modelos disponíveis</h2>
+                </div>
+                <button
+                  className="primary-button"
+                  onClick={createQuestionnaire}
+                  type="button"
+                  disabled={!canManageContent}
+                  title={canManageContent ? 'Criar modelo' : 'Seu perfil não permite criar modelos'}
+                >
+                  Novo formulário
+                </button>
               </div>
-              <button
-                className="primary-button"
-                onClick={createQuestionnaire}
-                type="button"
-                disabled={!canManageContent}
-                title={canManageContent ? 'Criar modelo' : 'Seu perfil não permite criar modelos'}
-              >
-                Criar modelo
-              </button>
-            </div>
-            <QuestionnaireFilters
-              query={questionnaireQuery}
-              domain={questionnaireDomain}
-              status={questionnaireStatus}
-              domains={questionnaireDomains}
-              onChange={updateFilters}
-              onClear={clearFilters}
-            />
-            <div className="cards-grid">
-              {filteredQuestionnaires.length === 0 ? (
-                <div className="empty-state">Nenhum questionário encontrado com esses filtros.</div>
+
+              <QuestionnaireFilters
+                query={questionnaireQuery}
+                domain={questionnaireDomain}
+                status={questionnaireStatus}
+                domains={questionnaireDomains}
+                onChange={updateFilters}
+                onClear={clearFilters}
+              />
+
+              <div className="simple-list">
+                {filteredQuestionnaires.length === 0 ? (
+                  <div className="empty-state">Nenhum questionário encontrado.</div>
+                ) : (
+                  filteredQuestionnaires.map((questionnaire) => (
+                    <QuestionnaireCard
+                      key={questionnaire.id}
+                      questionnaire={questionnaire}
+                      isSelected={questionnaire.id === selectedQuestionnaireId}
+                      onSelect={setSelectedQuestionnaireId}
+                    />
+                  ))
+                )}
+              </div>
+            </article>
+
+            <article className="panel library-detail-panel">
+              <div className="panel-header">
+                <div>
+                  <span className="eyebrow">Detalhe</span>
+                  <h2>{selectedQuestionnaire?.title ?? 'Selecione um modelo'}</h2>
+                </div>
+                <span className="status-chip">{selectedQuestionnaire?.status ?? 'draft'}</span>
+              </div>
+
+              {selectedQuestionnaire ? (
+                <div className="library-detail">
+                  <p>{selectedQuestionnaire.subtitle}</p>
+                  <div className="preview-meta">
+                    <span>{selectedQuestionnaire.domain}</span>
+                    <span>{selectedQuestionnaire.audience}</span>
+                    <span>{selectedQuestionnaire.questions.length} perguntas</span>
+                  </div>
+                  <div className="library-detail-actions">
+                    <button className="primary-button" type="button" onClick={() => setActiveView('responder')}>
+                      Responder
+                    </button>
+                    <button className="ghost-button" type="button" onClick={() => setActiveView('construtor')}>
+                      Editar
+                    </button>
+                    <button className="ghost-button" type="button" onClick={() => setActiveView('resultados')}>
+                      Resultados
+                    </button>
+                  </div>
+                </div>
               ) : (
-                filteredQuestionnaires.map((questionnaire) => (
-                  <QuestionnaireCard
-                    key={questionnaire.id}
-                    questionnaire={questionnaire}
-                    isSelected={questionnaire.id === selectedQuestionnaireId}
-                    onSelect={setSelectedQuestionnaireId}
-                  />
-                ))
+                <div className="empty-state">Escolha um questionário para ver os detalhes aqui.</div>
               )}
-            </div>
+            </article>
           </section>
         )}
 

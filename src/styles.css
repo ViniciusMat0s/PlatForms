@@ -791,6 +791,39 @@ a {
   grid-column: 1 / -1;
 }
 
+.library-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+  gap: 1rem;
+}
+
+.library-panel,
+.library-detail-panel {
+  min-width: 0;
+}
+
+.library-detail {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.library-detail p {
+  margin: 0;
+  color: var(--text);
+}
+
+.library-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.library-detail-actions .primary-button,
+.library-detail-actions .ghost-button {
+  flex: 1;
+  min-width: 8rem;
+}
+
 .status-chip {
   display: inline-flex;
   align-items: center;
@@ -945,7 +978,7 @@ a {
 
 .filters-bar {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) repeat(2, minmax(160px, 1fr)) auto;
+  grid-template-columns: minmax(0, 1.6fr) minmax(180px, 0.9fr) auto;
   gap: 0.75rem;
   margin: 0.9rem 0 1rem;
   align-items: end;
@@ -965,6 +998,10 @@ a {
   background: rgba(255, 255, 255, 0.82);
   box-shadow: 0 14px 28px rgba(63, 92, 128, 0.08);
   transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.simple-list .questionnaire-card {
+  width: 100%;
 }
 
 .questionnaire-card:hover,
@@ -1016,6 +1053,44 @@ a {
   padding: 1.2rem;
   display: grid;
   gap: 1rem;
+}
+
+.runner-panel {
+  gap: 1rem;
+}
+
+.runner-panel .panel-header p {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+}
+
+.runner-info-grid {
+  margin-top: 0.2rem;
+}
+
+.runner-progress {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.95rem 1rem;
+  border-radius: 1.1rem;
+  background: rgba(246, 250, 255, 0.96);
+  border: 1px solid rgba(131, 159, 188, 0.2);
+}
+
+.runner-progress span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.runner-progress strong {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--title);
+  font-family: 'Poppins', sans-serif;
+}
+
+.runner-track {
+  height: 0.75rem;
 }
 
 .result-list,
@@ -1367,6 +1442,10 @@ a {
   .dashboard-simple-grid {
     grid-template-columns: 1fr;
   }
+
+  .library-layout {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 900px) {
@@ -1396,6 +1475,10 @@ a {
   }
 
   .dashboard-simple-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .library-layout {
     grid-template-columns: 1fr;
   }
 }

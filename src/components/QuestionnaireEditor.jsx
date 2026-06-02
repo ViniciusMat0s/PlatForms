@@ -27,17 +27,12 @@ export default function QuestionnaireEditor({
     <section className="panel">
       <div className="panel-header">
         <div>
-          <span className="eyebrow">Construtor</span>
-          <h2>Estrutura do questionário</h2>
+          <span className="eyebrow">Editar</span>
+          <h2>Questionário</h2>
         </div>
-        <span className="badge">{canEdit ? 'Rascunho editável' : 'Apenas leitura'}</span>
       </div>
 
-      {!canEdit ? (
-        <div className="empty-state small">
-          Seu perfil atual pode visualizar questionários, mas não alterar a estrutura.
-        </div>
-      ) : null}
+      {!canEdit ? <div className="empty-state small">Seu perfil pode ver, mas não editar este conteúdo.</div> : null}
 
       <div className="editor-grid">
         <label className="field">
@@ -83,8 +78,10 @@ export default function QuestionnaireEditor({
 
       <div className="scale-editor">
         <div className="section-title">
-          <h3>Escala de resposta</h3>
-          <p>Os rótulos podem mudar de um instrumento para outro.</p>
+          <div>
+            <h3>Escala de resposta</h3>
+            <p>Edite os rótulos se o instrumento pedir outra escala.</p>
+          </div>
         </div>
 
         <div className="scale-pills">
@@ -101,14 +98,17 @@ export default function QuestionnaireEditor({
 
       <div className="questions-editor">
         <div className="section-title">
-          <h3>Perguntas</h3>
+          <div>
+            <h3>Perguntas</h3>
+            <p>Adicione, edite ou remova os itens do formulário.</p>
+          </div>
           <button
             className="ghost-button"
             onClick={() => onAddQuestion(questionnaire.id)}
             type="button"
             disabled={!canEdit}
           >
-            Adicionar pergunta
+            Nova pergunta
           </button>
         </div>
 
