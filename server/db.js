@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { DatabaseSync } from 'node:sqlite';
 import { seedQuestionnaires } from '../src/data/seed.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -14,6 +13,7 @@ let sqliteDatabase = null;
 let sqliteInitializationPromise = null;
 let postgresInitializationPromise = null;
 let postgresSql = null;
+let DatabaseSyncCtor = null;
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
@@ -196,7 +196,10 @@ function initializeSqliteSchema(db) {
 
 function openSqliteDatabase() {
   if (!sqliteDatabase) {
-    sqliteDatabase = new DatabaseSync(SQLITE_DB_PATH);
+    if (!DatabaseSyncCtor) {
+      throw new Error('SQLite indisponível neste runtime.');
+    }
+    sqliteDatabase = new DatabaseSyncCtor(SQLITE_DB_PATH);
     initializeSqliteSchema(sqliteDatabase);
   }
 
@@ -278,6 +281,11 @@ async function ensureSqliteInitialized() {
   if (!sqliteInitializationPromise) {
     sqliteInitializationPromise = (async () => {
       await fs.mkdir(DATA_DIR, { recursive: true });
+
+      if (!DatabaseSyncCtor) {
+        const sqliteModule = await import('node:sqlite');
+        DatabaseSyncCtor = sqliteModule.DatabaseSync;
+      }
 
       const db = openSqliteDatabase();
       const questionnairesCount = db.prepare('SELECT COUNT(*) AS count FROM questionnaires').get().count;
