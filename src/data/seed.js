@@ -41,6 +41,11 @@ const hseScale = createScale({
   labels: ['Nunca', 'Raramente', 'Às Vezes', 'Frequentemente', 'Sempre'],
 });
 
+const selfEfficacyScale = createScale({
+  id: 'self-efficacy-5',
+  labels: ['Nada', 'Pouco', 'Mais ou Menos', 'Muito', 'Extremamente'],
+});
+
 const engagementScale = createScale({
   id: 'engagement-5',
   labels: ['1', '2', '3', '4', '5'],
@@ -335,6 +340,45 @@ export const seedQuestionnaires = [
       q('hse-33', 'Tenho oportunidade para pedir explicações ao chefe sobre as mudanças no trabalho.'),
       q('hse-34', 'As pessoas são sempre consultadas sobre as mudanças no trabalho.'),
       q('hse-35', 'Quando há mudanças, faço o meu trabalho com o mesmo carinho.'),
+    ],
+  }),
+  createQuestionnaire({
+    id: createQuestionnaireId('Protocolo para avaliar autoeficácia'),
+    code: 'protocolo-para-avaliar-autoeficacia',
+    title: 'Protocolo para avaliar autoeficácia',
+    subtitle: 'Avalia confiança, adaptação e capacidade de execução no trabalho.',
+    audience: 'Adulto',
+    domain: 'Trabalho e bem-estar',
+    source: 'Documento enviado pelo usuário',
+    status: 'active',
+    tags: ['autoeficacia', 'trabalho'],
+    scale: selfEfficacyScale,
+    bands: defaultBands,
+    scoring: { type: 'mean_scaled', reverseQuestions: [] },
+    questions: [
+      q('se-1', 'Pensar em alternativas para resolver problemas da melhor forma possível'),
+      q('se-2', 'Me esforçar para ir atrás das normas e procedimentos da organização em que trabalho'),
+      q('se-3', 'Me adaptar às regras propostas pela empresa em que trabalho'),
+      q('se-4', 'Trabalhar com pessoas que têm opiniões diferentes'),
+      q('se-5', 'Trabalhar com pessoas com menos experiência profissional do que eu'),
+      q('se-6', 'Entender e aceitar as críticas construtivas que recebo quando meu desempenho é avaliado'),
+      q('se-7', 'Trabalhar em equipe'),
+      q('se-8', 'Trabalhar com pessoas com mais experiência profissional do que eu'),
+      q('se-9', 'Iniciar minhas funções sem ser cobrado pela chefia'),
+      q('se-10', 'Buscar informações que me possibilitem executar minhas funções de trabalho de forma adequada'),
+      q('se-11', 'Lidar com a maioria dos problemas que aparecem em meu trabalho'),
+      q('se-12', 'Resolver a maioria dos problemas que ocorrem em meu trabalho'),
+      q('se-13', 'Executar o que deve ser feito em meu trabalho'),
+      q('se-14', 'Me comunicar adequadamente com meus colegas de trabalho'),
+      q('se-15', 'Estabelecer boas relações com meus colegas do meu setor de trabalho'),
+      q('se-16', 'Respeitar meus colegas de trabalho'),
+      q('se-17', 'Planejar o que deve ser feito em meu trabalho'),
+      q('se-18', 'Desempenhar da melhor forma possível minhas funções'),
+      q('se-19', 'Me organizar para que meu trabalho não fique atrasado'),
+      q('se-20', 'Administrar meu tempo em relação às minhas funções no trabalho'),
+      q('se-21', 'Estabelecer boas relações com colegas de outros setores'),
+      q('se-22', 'Trabalhar com pessoas mais novas do que eu'),
+      q('se-23', 'Traçar um plano de ação para o meu trabalho'),
     ],
   }),
   createQuestionnaire({
