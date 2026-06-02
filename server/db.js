@@ -13,6 +13,11 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+function normalizeRole(role) {
+  if (role === 'admin' || role === 'leitor') return role;
+  return null;
+}
+
 function createSeedDb() {
   const now = new Date().toISOString();
 
@@ -35,18 +40,11 @@ function createSeedDb() {
         role: 'admin',
       },
       {
-        id: 'user-editor',
-        name: 'Editor',
-        email: 'editor@local',
-        password: 'editor123',
-        role: 'editor',
-      },
-      {
-        id: 'user-viewer',
+        id: 'user-reader',
         name: 'Leitor',
-        email: 'viewer@local',
-        password: 'viewer123',
-        role: 'viewer',
+        email: 'leitor@local',
+        password: 'leitor123',
+        role: 'leitor',
       },
     ],
     sessions: [],
@@ -65,12 +63,33 @@ function mergeMissingById(existingItems, defaultItems) {
   return Array.from(map.values());
 }
 
+function mergeUsers(existingUsers, defaultUsers) {
+  const map = new Map();
+
+  for (const user of defaultUsers) {
+    map.set(user.id, user);
+  }
+
+  for (const user of existingUsers) {
+    const normalizedRole = normalizeRole(user.role);
+    if (!normalizedRole) continue;
+
+    map.set(user.id, {
+      ...user,
+      role: normalizedRole,
+    });
+  }
+
+  return Array.from(map.values());
+}
+
 function normalizeDatabase(db) {
   const seed = createSeedDb();
   const questionnaires = mergeMissingById(db.questionnaires ?? [], seed.questionnaires);
-  const users = mergeMissingById(db.users ?? [], seed.users);
+  const users = mergeUsers(db.users ?? [], seed.users);
   const responses = Array.isArray(db.responses) ? db.responses : [];
-  const sessions = Array.isArray(db.sessions) ? db.sessions : [];
+  const userIds = new Set(users.map((user) => user.id));
+  const sessions = Array.isArray(db.sessions) ? db.sessions.filter((session) => userIds.has(session.userId)) : [];
 
   return {
     questionnaires,

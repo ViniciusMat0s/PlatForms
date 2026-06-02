@@ -115,11 +115,11 @@ app.post(
 
 app.get(
   '/api/state',
-  requireAuth(async (_req, res) => {
+  requireAuth(async (req, res) => {
     const db = await readDatabase();
     res.json({
       questionnaires: db.questionnaires,
-      responses: db.responses,
+      responses: req.auth.user.role === 'admin' ? db.responses : [],
     });
   }),
 );
@@ -134,7 +134,7 @@ app.get(
 
 app.post(
   '/api/questionnaires',
-  requireRole(['admin', 'editor'], async (req, res) => {
+  requireRole(['admin'], async (req, res) => {
     const questionnaire = createQuestionnaireFromInput(req.body ?? {});
     const db = await readDatabase();
     db.questionnaires = [questionnaire, ...db.questionnaires];
@@ -145,7 +145,7 @@ app.post(
 
 app.put(
   '/api/questionnaires/:id',
-  requireRole(['admin', 'editor'], async (req, res) => {
+  requireRole(['admin'], async (req, res) => {
     const { id } = req.params;
     const db = await readDatabase();
     const index = db.questionnaires.findIndex((item) => item.id === id);
@@ -173,7 +173,7 @@ app.put(
 
 app.delete(
   '/api/questionnaires/:id',
-  requireRole(['admin', 'editor'], async (req, res) => {
+  requireRole(['admin'], async (req, res) => {
     const { id } = req.params;
     const db = await readDatabase();
     const exists = db.questionnaires.some((item) => item.id === id);
@@ -191,7 +191,7 @@ app.delete(
 
 app.get(
   '/api/responses',
-  requireAuth(async (_req, res) => {
+  requireRole(['admin'], async (_req, res) => {
     const db = await readDatabase();
     res.json(db.responses);
   }),
@@ -222,7 +222,7 @@ app.post(
 
 app.get(
   '/api/reports/summary',
-  requireAuth(async (_req, res) => {
+  requireRole(['admin'], async (_req, res) => {
     const db = await readDatabase();
     const recentResponse = db.responses[0] ?? null;
 

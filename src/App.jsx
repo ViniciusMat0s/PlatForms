@@ -57,6 +57,10 @@ function getSelectedQuestionnaire(questionnaires, selectedQuestionnaireId) {
   return questionnaires.find((item) => item.id === selectedQuestionnaireId) ?? questionnaires[0] ?? null;
 }
 
+function getDefaultViewForRole(role) {
+  return role === 'admin' ? 'dashboard' : 'responder';
+}
+
 export default function App() {
   const [authStatus, setAuthStatus] = useState('checking');
   const [authLoading, setAuthLoading] = useState(false);
@@ -70,7 +74,7 @@ export default function App() {
   const [syncStatus, setSyncStatus] = useState('Carregando');
   const [pendingFormId, setPendingFormId] = useState('');
 
-  const canManageContent = currentUser?.role === 'admin' || currentUser?.role === 'editor';
+  const canManageContent = currentUser?.role === 'admin';
 
   const selectedQuestionnaire = useMemo(
     () => getSelectedQuestionnaire(questionnaires, selectedQuestionnaireId),
@@ -103,11 +107,11 @@ export default function App() {
     setSelectedQuestionnaireId((current) => current ?? nextQuestionnaires[0]?.id ?? null);
   };
 
-  const hydrateState = async () => {
+  const hydrateState = async (role = currentUser?.role) => {
     try {
       const state = await getState();
       const nextQuestionnaires = state.questionnaires?.length ? state.questionnaires : seedQuestionnaires;
-      const nextResponses = state.responses ?? [];
+      const nextResponses = role === 'admin' ? state.responses ?? [] : [];
       applyState(nextQuestionnaires, nextResponses);
       const formId = pendingFormId || new URLSearchParams(window.location.search).get('form') || '';
       if (formId && nextQuestionnaires.some((item) => item.id === formId)) {
@@ -116,7 +120,7 @@ export default function App() {
       setSyncStatus('Online');
     } catch {
       const cachedQuestionnaires = loadState(QUESTIONNAIRES_KEY, seedQuestionnaires);
-      const cachedResponses = loadState(RESPONSES_KEY, []);
+      const cachedResponses = role === 'admin' ? loadState(RESPONSES_KEY, []) : [];
       applyState(cachedQuestionnaires, cachedResponses);
       const formId = pendingFormId || new URLSearchParams(window.location.search).get('form') || '';
       if (formId && cachedQuestionnaires.some((item) => item.id === formId)) {
@@ -148,7 +152,8 @@ export default function App() {
 
         setCurrentUser(user);
         setAuthStatus('signed_in');
-        await hydrateState();
+        await hydrateState(user.role);
+        setActiveView(getDefaultViewForRole(user.role));
       } catch {
         if (!mounted) return;
         window.localStorage.removeItem('forms-platform.token');
@@ -175,6 +180,19 @@ export default function App() {
     }
   }, [questionnaires, selectedQuestionnaireId]);
 
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const allowedViews =
+      currentUser.role === 'admin'
+        ? ['dashboard', 'biblioteca', 'construtor', 'responder', 'resultados']
+        : ['responder'];
+
+    if (!allowedViews.includes(activeView)) {
+      setActiveView(getDefaultViewForRole(currentUser.role));
+    }
+  }, [activeView, currentUser]);
+
   const handleLogin = async ({ email, password }) => {
     setAuthLoading(true);
     setAuthError('');
@@ -183,8 +201,8 @@ export default function App() {
       const data = await apiLogin(email, password);
       setCurrentUser(data.user);
       setAuthStatus('signed_in');
-      await hydrateState();
-      setActiveView('dashboard');
+      await hydrateState(data.user.role);
+      setActiveView(getDefaultViewForRole(data.user.role));
     } catch (error) {
       setAuthError(error.message || 'Falha ao entrar.');
     } finally {
@@ -346,7 +364,7 @@ export default function App() {
       />
 
       <main className="main-content">
-        {(activeView === 'dashboard' || activeView === 'biblioteca') && (
+        {currentUser?.role === 'admin' && (activeView === 'dashboard' || activeView === 'biblioteca') && (
           <DashboardPanel
             currentUser={currentUser}
             questionnaires={questionnaires}
@@ -363,7 +381,7 @@ export default function App() {
           />
         )}
 
-        {activeView === 'construtor' && (
+        {currentUser?.role === 'admin' && activeView === 'construtor' && (
           <QuestionnaireEditor
             key={selectedQuestionnaire?.id ?? 'no-questionnaire'}
             questionnaire={selectedQuestionnaire}
@@ -382,7 +400,9 @@ export default function App() {
           />
         )}
 
-        {activeView === 'resultados' && <ResultsPanel questionnaires={questionnaires} responses={responses} />}
+        {currentUser?.role === 'admin' && activeView === 'resultados' && (
+          <ResultsPanel questionnaires={questionnaires} responses={responses} />
+        )}
       </main>
     </div>
   );

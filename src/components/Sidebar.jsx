@@ -1,11 +1,13 @@
 import Icon from './Icon';
 
-const navigation = [
+const adminNavigation = [
   { id: 'dashboard', label: 'Visão geral', icon: 'dashboard' },
   { id: 'biblioteca', label: 'Formulários', icon: 'library' },
   { id: 'responder', label: 'Responder', icon: 'runner' },
   { id: 'resultados', label: 'Respostas', icon: 'results' },
 ];
+
+const readerNavigation = [{ id: 'responder', label: 'Responder', icon: 'runner' }];
 
 function getInitials(name) {
   if (!name) return 'FP';
@@ -17,7 +19,16 @@ function getInitials(name) {
     .join('');
 }
 
+function getRoleLabel(role) {
+  if (role === 'admin') return 'Administrador';
+  if (role === 'leitor') return 'Leitor';
+  return 'Convidado';
+}
+
 export default function Sidebar({ activeView, onChangeView, currentUser, onLogout }) {
+  const navigation = currentUser?.role === 'admin' ? adminNavigation : readerNavigation;
+  const roleLabel = currentUser ? getRoleLabel(currentUser.role) : 'Desconectado';
+
   return (
     <aside className="sidebar">
       <div className="sidebar-top">
@@ -51,7 +62,7 @@ export default function Sidebar({ activeView, onChangeView, currentUser, onLogou
           <span className="profile-avatar">{getInitials(currentUser?.name)}</span>
           <div>
             <strong>{currentUser ? currentUser.name : 'Sem sessão'}</strong>
-            <span>{currentUser ? currentUser.role : 'Desconectado'}</span>
+            <span>{roleLabel}</span>
           </div>
         </div>
 
