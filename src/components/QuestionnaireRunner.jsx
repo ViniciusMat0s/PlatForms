@@ -58,7 +58,9 @@ export default function QuestionnaireRunner({ questionnaire, onSubmit }) {
 
       <div className="runner-progress">
         <div>
-          <span>{result.answered}/{result.total} respondidas</span>
+          <span>
+            {result.answered}/{result.total} respondidas
+          </span>
           <strong>{result.completionRate}% concluído</strong>
         </div>
         <div className="progress-track runner-track">

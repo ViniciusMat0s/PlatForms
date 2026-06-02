@@ -18,7 +18,7 @@ export default function ResultsPanel({ questionnaires, responses }) {
         <div>
           <span className="eyebrow">Resultados</span>
           <h1>Respostas</h1>
-          <p>Resumo rapido, medias e as ultimas respostas recebidas.</p>
+          <p>Resumo rápido, médias e as últimas respostas recebidas.</p>
         </div>
 
         <div className="workspace-actions">
@@ -37,9 +37,9 @@ export default function ResultsPanel({ questionnaires, responses }) {
         </div>
       </header>
 
-      <div className="workspace-summary">
+        <div className="workspace-summary">
         <div className="summary-chip">
-          <span>Formularios</span>
+          <span>Formulários</span>
           <strong>{metrics.counts.total}</strong>
         </div>
         <div className="summary-chip">
@@ -47,7 +47,7 @@ export default function ResultsPanel({ questionnaires, responses }) {
           <strong>{metrics.counts.responses}</strong>
         </div>
         <div className="summary-chip">
-          <span>Media geral</span>
+          <span>Média geral</span>
           <strong>{metrics.averageScore.toFixed(1)}</strong>
         </div>
       </div>
@@ -55,7 +55,7 @@ export default function ResultsPanel({ questionnaires, responses }) {
       <div className="table-shell">
         <div className="table-shell-header">
           <div className="table-shell-title">
-            <h2>Ultimas respostas</h2>
+            <h2>Últimas respostas</h2>
             <span>{recent.length} itens</span>
           </div>
         </div>
@@ -64,9 +64,9 @@ export default function ResultsPanel({ questionnaires, responses }) {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Formulario</th>
+                <th>Formulário</th>
                 <th>Pessoa</th>
-                <th>Pontuacao</th>
+                <th>Pontuação</th>
                 <th>Faixa</th>
                 <th>Data</th>
               </tr>
@@ -84,7 +84,7 @@ export default function ResultsPanel({ questionnaires, responses }) {
                   return (
                     <tr key={response.id}>
                       <td>
-                        <strong>{questionnaire?.title ?? 'Formulario removido'}</strong>
+                        <strong>{questionnaire?.title ?? 'Formulário removido'}</strong>
                         <span>{questionnaire?.domain ?? 'Sem categoria'}</span>
                       </td>
                       <td>{response.respondentName || 'Sem nome'}</td>

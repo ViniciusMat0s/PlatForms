@@ -1,4 +1,4 @@
-import { createBand, createQuestion, createQuestionnaire, createScale } from './questionnaireSchema.js';
+﻿import { createBand, createQuestion, createQuestionnaire, createScale } from './questionnaireSchema.js';
 import { createQuestionnaireId } from '../lib/scoring.js';
 
 const fivePointLikert = createScale({
@@ -386,3 +386,4 @@ export const extraQuestionnaires = [
     ],
   }),
 ];
+

@@ -1,8 +1,8 @@
 import Icon from './Icon';
 
 const navigation = [
-  { id: 'dashboard', label: 'Visao geral', icon: 'dashboard' },
-  { id: 'biblioteca', label: 'Formularios', icon: 'library' },
+  { id: 'dashboard', label: 'Visão geral', icon: 'dashboard' },
+  { id: 'biblioteca', label: 'Formulários', icon: 'library' },
   { id: 'responder', label: 'Responder', icon: 'runner' },
   { id: 'resultados', label: 'Respostas', icon: 'results' },
 ];
@@ -37,7 +37,7 @@ export default function Sidebar({
           <span className="brand-mark">FP</span>
           <div>
             <strong>Forms Platform</strong>
-            <small>Simple workspace</small>
+            <small>Espaço simples de trabalho</small>
           </div>
         </div>
 
@@ -46,13 +46,13 @@ export default function Sidebar({
           <input
             value={searchQuery}
             onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="Pesquisa rapida..."
+            placeholder="Pesquisa rápida..."
           />
           <span className="sidebar-shortcut">Ctrl K</span>
         </label>
 
         <div className="sidebar-section">
-          <span className="sidebar-section-title">Navegacao</span>
+          <span className="sidebar-section-title">Navegação</span>
           <nav className="nav">
             {navigation.map((item) => (
               <button
@@ -74,7 +74,7 @@ export default function Sidebar({
           <span className="sidebar-section-title">Recentes</span>
           <div className="sidebar-recent-list">
             {recentQuestionnaires.length === 0 ? (
-              <div className="sidebar-empty">Nenhum formulario recente.</div>
+              <div className="sidebar-empty">Nenhum formulário recente.</div>
             ) : (
               recentQuestionnaires.map((questionnaire) => (
                 <button
@@ -102,7 +102,7 @@ export default function Sidebar({
         <div className="profile-panel">
           <span className="profile-avatar">{getInitials(currentUser?.name)}</span>
           <div>
-            <strong>{currentUser ? currentUser.name : 'Sem sessao'}</strong>
+            <strong>{currentUser ? currentUser.name : 'Sem sessão'}</strong>
             <span>{currentUser ? currentUser.role : 'Desconectado'}</span>
           </div>
         </div>

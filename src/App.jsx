@@ -23,15 +23,15 @@ const RESPONSES_KEY = 'forms-platform.responses';
 
 function createBlankQuestionnaire() {
   return {
-    id: createQuestionnaireId(`Novo questionario ${Date.now()}`),
-    title: 'Novo questionario',
+    id: createQuestionnaireId(`Novo questionário ${Date.now()}`),
+    title: 'Novo questionário',
     subtitle: 'Descreva o objetivo do instrumento.',
     audience: 'Adulto',
     domain: 'Personalizado',
     source: 'Rascunho local',
     scale: {
       id: 'likert-5',
-      labels: ['Nunca', 'Raramente', 'As vezes', 'Frequentemente', 'Sempre'],
+      labels: ['Nunca', 'Raramente', 'Às vezes', 'Frequentemente', 'Sempre'],
       values: [0, 1, 2, 3, 4],
     },
     bands: [
@@ -321,7 +321,7 @@ export default function App() {
         <div className="login-card">
           <span className="eyebrow">Carregando</span>
           <h1>Preparando o ambiente</h1>
-          <p>Estamos verificando sua sessao e carregando os dados da plataforma.</p>
+          <p>Estamos verificando sua sessão e carregando os dados da plataforma.</p>
         </div>
       </section>
     );

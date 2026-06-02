@@ -1,4 +1,4 @@
-import { createQuestionnaireId } from '../lib/scoring.js';
+﻿import { createQuestionnaireId } from '../lib/scoring.js';
 import { createBand, createQuestion, createQuestionnaire, createScale } from './questionnaireSchema.js';
 import { extraQuestionnaires } from './questionnaireExtras.js';
 
@@ -154,3 +154,4 @@ export const seedQuestionnaires = [
   }),
   ...extraQuestionnaires,
 ];
+

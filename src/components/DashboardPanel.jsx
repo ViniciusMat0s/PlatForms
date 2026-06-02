@@ -39,11 +39,11 @@ export default function DashboardPanel({
     rows[0] ??
     null;
 
-  const title = activeView === 'biblioteca' ? 'Formularios' : 'Visao geral';
+  const title = activeView === 'biblioteca' ? 'Formulários' : 'Visão geral';
   const subtitle =
     activeView === 'biblioteca'
-      ? 'Veja os formularios cadastrados, abra um modelo e envie para outras pessoas.'
-      : 'Crie formularios, envie rapidamente e acompanhe as respostas em uma tela simples.';
+      ? 'Veja os formulários cadastrados, abra um modelo e envie para outras pessoas.'
+      : 'Crie formulários, envie rapidamente e acompanhe as respostas em uma tela simples.';
 
   return (
     <section className="workspace-page">
@@ -59,14 +59,14 @@ export default function DashboardPanel({
             Ver respostas
           </button>
           <button className="primary-button" type="button" onClick={onCreateQuestionnaire} disabled={!canManageContent}>
-            Novo formulario
+            Novo formulário
           </button>
         </div>
       </header>
 
       <div className="workspace-summary">
         <div className="summary-chip">
-          <span>Formularios</span>
+          <span>Formulários</span>
           <strong>{metrics.counts.total}</strong>
         </div>
         <div className="summary-chip">
@@ -74,7 +74,7 @@ export default function DashboardPanel({
           <strong>{metrics.counts.responses}</strong>
         </div>
         <div className="summary-chip">
-          <span>Media</span>
+          <span>Média</span>
           <strong>{metrics.averageScore.toFixed(1)}</strong>
         </div>
         <div className="summary-chip muted">
@@ -86,7 +86,7 @@ export default function DashboardPanel({
       <div className="table-shell">
         <div className="table-shell-header">
           <div className="table-shell-title">
-            <h2>Formularios</h2>
+            <h2>Formulários</h2>
             <span>{rows.length} itens</span>
           </div>
           <button className="ghost-button" type="button" onClick={() => onOpenView('biblioteca')}>
@@ -98,12 +98,12 @@ export default function DashboardPanel({
           <table className="data-table">
             <thead>
               <tr>
-                <th>Formulario</th>
+                <th>Formulário</th>
                 <th>Status</th>
                 <th>Perguntas</th>
                 <th>Respostas</th>
-                <th>Media</th>
-                <th>Publico</th>
+                <th>Média</th>
+                <th>Público</th>
                 <th />
               </tr>
             </thead>
@@ -111,7 +111,7 @@ export default function DashboardPanel({
               {rows.length === 0 ? (
                 <tr>
                   <td colSpan={7}>
-                    <div className="empty-state small">Nenhum formulario encontrado.</div>
+                    <div className="empty-state small">Nenhum formulário encontrado.</div>
                   </td>
                 </tr>
               ) : (
@@ -156,11 +156,11 @@ export default function DashboardPanel({
           <span className="eyebrow">Selecionado</span>
           {preview ? (
             <>
-              <strong>{preview.title}</strong>
+            <strong>{preview.title}</strong>
               <p>{preview.subtitle}</p>
             </>
           ) : (
-            <p>Nenhum formulario selecionado.</p>
+            <p>Nenhum formulário selecionado.</p>
           )}
         </div>
 
