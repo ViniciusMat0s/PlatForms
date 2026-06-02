@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import LoginPanel from './components/LoginPanel';
+import QuestionnaireFilters from './components/QuestionnaireFilters';
 import QuestionnaireCard from './components/QuestionnaireCard';
 import QuestionnaireEditor from './components/QuestionnaireEditor';
 import QuestionnaireRunner from './components/QuestionnaireRunner';
@@ -63,6 +64,9 @@ export default function App() {
   const [activeView, setActiveView] = useState('dashboard');
   const [selectedQuestionnaireId, setSelectedQuestionnaireId] = useState(null);
   const [syncStatus, setSyncStatus] = useState('Carregando');
+  const [questionnaireQuery, setQuestionnaireQuery] = useState('');
+  const [questionnaireDomain, setQuestionnaireDomain] = useState('all');
+  const [questionnaireStatus, setQuestionnaireStatus] = useState('all');
   const canManageContent = currentUser?.role === 'admin' || currentUser?.role === 'editor';
 
   const selectedQuestionnaire = useMemo(
@@ -78,6 +82,58 @@ export default function App() {
     }),
     [questionnaires.length, responses.length, selectedQuestionnaire],
   );
+
+  const questionnaireDomains = useMemo(() => {
+    return Array.from(new Set(questionnaires.map((questionnaire) => questionnaire.domain).filter(Boolean))).sort(
+      (a, b) => a.localeCompare(b),
+    );
+  }, [questionnaires]);
+
+  const filteredQuestionnaires = useMemo(() => {
+    const query = questionnaireQuery.trim().toLowerCase();
+
+    return questionnaires.filter((questionnaire) => {
+      const matchesQuery =
+        query.length === 0 ||
+        [
+          questionnaire.title,
+          questionnaire.subtitle,
+          questionnaire.domain,
+          questionnaire.code,
+          questionnaire.audience,
+          ...(questionnaire.tags ?? []),
+          ...(questionnaire.questions ?? []).map((question) => question.text),
+        ]
+          .filter(Boolean)
+          .some((value) => String(value).toLowerCase().includes(query));
+
+      const matchesDomain =
+        questionnaireDomain === 'all' || questionnaire.domain === questionnaireDomain;
+
+      const matchesStatus =
+        questionnaireStatus === 'all' || questionnaire.status === questionnaireStatus;
+
+      return matchesQuery && matchesDomain && matchesStatus;
+    });
+  }, [questionnaires, questionnaireQuery, questionnaireDomain, questionnaireStatus]);
+
+  const updateFilters = (next) => {
+    if (Object.prototype.hasOwnProperty.call(next, 'query')) {
+      setQuestionnaireQuery(next.query);
+    }
+    if (Object.prototype.hasOwnProperty.call(next, 'domain')) {
+      setQuestionnaireDomain(next.domain);
+    }
+    if (Object.prototype.hasOwnProperty.call(next, 'status')) {
+      setQuestionnaireStatus(next.status);
+    }
+  };
+
+  const clearFilters = () => {
+    setQuestionnaireQuery('');
+    setQuestionnaireDomain('all');
+    setQuestionnaireStatus('all');
+  };
 
   const applyState = (nextQuestionnaires, nextResponses) => {
     setQuestionnaires(nextQuestionnaires);
@@ -383,18 +439,33 @@ export default function App() {
 
               <div className="section-title">
                 <h3>Biblioteca inicial</h3>
-                <p>Questionários importados como sementes do sistema.</p>
+                <p>
+                  {filteredQuestionnaires.length} de {questionnaires.length} questionários visíveis.
+                </p>
               </div>
 
+              <QuestionnaireFilters
+                query={questionnaireQuery}
+                domain={questionnaireDomain}
+                status={questionnaireStatus}
+                domains={questionnaireDomains}
+                onChange={updateFilters}
+                onClear={clearFilters}
+              />
+
               <div className="cards-grid">
-                {questionnaires.map((questionnaire) => (
-                  <QuestionnaireCard
-                    key={questionnaire.id}
-                    questionnaire={questionnaire}
-                    isSelected={questionnaire.id === selectedQuestionnaireId}
-                    onSelect={setSelectedQuestionnaireId}
-                  />
-                ))}
+                {filteredQuestionnaires.length === 0 ? (
+                  <div className="empty-state">Nenhum questionário encontrado com esses filtros.</div>
+                ) : (
+                  filteredQuestionnaires.map((questionnaire) => (
+                    <QuestionnaireCard
+                      key={questionnaire.id}
+                      questionnaire={questionnaire}
+                      isSelected={questionnaire.id === selectedQuestionnaireId}
+                      onSelect={setSelectedQuestionnaireId}
+                    />
+                  ))
+                )}
               </div>
             </article>
 
@@ -404,11 +475,11 @@ export default function App() {
 
         {activeView === 'biblioteca' && (
           <section className="panel">
-              <div className="panel-header">
-                <div>
-                  <span className="eyebrow">Biblioteca</span>
-                  <h2>Modelos disponíveis</h2>
-                </div>
+            <div className="panel-header">
+              <div>
+                <span className="eyebrow">Biblioteca</span>
+                <h2>Modelos disponíveis</h2>
+              </div>
               <button
                 className="primary-button"
                 onClick={createQuestionnaire}
@@ -419,15 +490,27 @@ export default function App() {
                 Criar modelo
               </button>
             </div>
+            <QuestionnaireFilters
+              query={questionnaireQuery}
+              domain={questionnaireDomain}
+              status={questionnaireStatus}
+              domains={questionnaireDomains}
+              onChange={updateFilters}
+              onClear={clearFilters}
+            />
             <div className="cards-grid">
-              {questionnaires.map((questionnaire) => (
-                <QuestionnaireCard
-                  key={questionnaire.id}
-                  questionnaire={questionnaire}
-                  isSelected={questionnaire.id === selectedQuestionnaireId}
-                  onSelect={setSelectedQuestionnaireId}
-                />
-              ))}
+              {filteredQuestionnaires.length === 0 ? (
+                <div className="empty-state">Nenhum questionário encontrado com esses filtros.</div>
+              ) : (
+                filteredQuestionnaires.map((questionnaire) => (
+                  <QuestionnaireCard
+                    key={questionnaire.id}
+                    questionnaire={questionnaire}
+                    isSelected={questionnaire.id === selectedQuestionnaireId}
+                    onSelect={setSelectedQuestionnaireId}
+                  />
+                ))
+              )}
             </div>
           </section>
         )}

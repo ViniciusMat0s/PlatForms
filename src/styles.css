@@ -246,6 +246,33 @@ button {
   gap: 0.6rem;
 }
 
+.filters-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) repeat(2, minmax(180px, 1fr)) auto;
+  gap: 0.75rem;
+  margin: 1rem 0 1.1rem;
+  align-items: end;
+}
+
+.filters-bar select {
+  width: 100%;
+  padding: 0.88rem 0.95rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(3, 6, 11, 0.55);
+  color: var(--text);
+  outline: none;
+}
+
+.filters-bar select:focus {
+  border-color: rgba(255, 159, 67, 0.45);
+  box-shadow: 0 0 0 3px rgba(255, 159, 67, 0.1);
+}
+
+.filters-reset {
+  height: 3rem;
+}
+
 .panel-header {
   margin-bottom: 1rem;
 }
