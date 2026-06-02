@@ -41,6 +41,11 @@ const boredomScale = createScale({
   labels: ['1', '2', '3', '4', '5'],
 });
 
+const workaholicScale = createScale({
+  id: 'workaholic-5',
+  labels: ['1', '2', '3', '4', '5'],
+});
+
 const burnoutScale = createScale({
   id: 'burnout-5',
   labels: ['Nunca', 'Raramente', 'Às Vezes', 'Frequentemente', 'Sempre'],
@@ -284,6 +289,32 @@ export const seedQuestionnaires = [
       q('tb-7', 'Tenho a tendência de fazer outras coisas quando estou trabalhando'),
       q('tb-8', 'Não há muito o que fazer no meu trabalho'),
       q('tb-9', 'Tenho dificuldade em cumprir regras, prazos e combinações no meu trabalho.'),
+    ],
+  }),
+  createQuestionnaire({
+    id: createQuestionnaireId('Será que sou um workaholic?'),
+    code: 'sera-que-sou-um-workaholic',
+    title: 'Será que sou um workaholic?',
+    subtitle: 'Compulsão, excesso de trabalho e dificuldade de desligar.',
+    audience: 'Adulto',
+    domain: 'Trabalho e bem-estar',
+    source: 'Documento enviado pelo usuário',
+    status: 'active',
+    tags: ['workaholic', 'trabalho'],
+    scale: workaholicScale,
+    bands: defaultBands,
+    scoring: { type: 'mean_scaled', reverseQuestions: [] },
+    questions: [
+      q('wh-1', 'Pareço apressado e correndo contra o tempo'),
+      q('wh-2', 'Continuo a trabalhar mesmo que meus colegas já tenham desistido ou ido embora'),
+      q('wh-3', 'Considero importante trabalhar bastante, mesmo quando não gosto do que estou fazendo.'),
+      q('wh-4', 'Mantenho-me ocupado e faço muitas coisas ao mesmo tempo.'),
+      q('wh-5', 'Sinto que algo dentro de mim me impulsiona a trabalhar muito.'),
+      q('wh-6', 'Gasto mais tempo trabalhando do que socializando com meus amigos ou em atividade de lazer.'),
+      q('wh-7', 'Sinto-me obrigado a trabalhar muito, mesmo quando o que estou fazendo não é prazeroso'),
+      q('wh-8', 'Percebo que faço duas ou três coisas ao mesmo tempo, tais como almoçar e tomar notas, enquanto falo ao telefone.'),
+      q('wh-9', 'Sinto-me culpado quando tiro folga no trabalho'),
+      q('wh-10', 'É difícil relaxar quando não estou trabalhando'),
     ],
   }),
   createQuestionnaire({
