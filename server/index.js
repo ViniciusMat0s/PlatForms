@@ -3,7 +3,7 @@ import express from 'express';
 import crypto from 'node:crypto';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
-import { createQuestionnaireFromInput, readDatabase, writeDatabase } from './db.js';
+import { readDatabase, writeDatabase } from './db.js';
 
 const app = express();
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3001;
@@ -135,57 +135,27 @@ app.get(
 app.post(
   '/api/questionnaires',
   requireRole(['admin'], async (req, res) => {
-    const questionnaire = createQuestionnaireFromInput(req.body ?? {});
-    const db = await readDatabase();
-    db.questionnaires = [questionnaire, ...db.questionnaires];
-    await writeDatabase(db);
-    res.status(201).json(questionnaire);
+    res.status(405).json({
+      error: 'O catálogo de formulários é fixo e vem do documento de levantamento.',
+    });
   }),
 );
 
 app.put(
   '/api/questionnaires/:id',
   requireRole(['admin'], async (req, res) => {
-    const { id } = req.params;
-    const db = await readDatabase();
-    const index = db.questionnaires.findIndex((item) => item.id === id);
-
-    if (index === -1) {
-      return res.status(404).json({ error: 'Questionário não encontrado.' });
-    }
-
-    const updated = {
-      ...db.questionnaires[index],
-      ...req.body,
-      id,
-      metadata: {
-        ...db.questionnaires[index].metadata,
-        ...(req.body?.metadata ?? {}),
-        updatedAt: new Date().toISOString(),
-      },
-    };
-
-    db.questionnaires[index] = updated;
-    await writeDatabase(db);
-    res.json(updated);
+    res.status(405).json({
+      error: 'O catálogo de formulários é fixo e não pode ser alterado.',
+    });
   }),
 );
 
 app.delete(
   '/api/questionnaires/:id',
   requireRole(['admin'], async (req, res) => {
-    const { id } = req.params;
-    const db = await readDatabase();
-    const exists = db.questionnaires.some((item) => item.id === id);
-
-    if (!exists) {
-      return res.status(404).json({ error: 'Questionário não encontrado.' });
-    }
-
-    db.questionnaires = db.questionnaires.filter((item) => item.id !== id);
-    db.responses = db.responses.filter((item) => item.questionnaireId !== id);
-    await writeDatabase(db);
-    res.json({ ok: true });
+    res.status(405).json({
+      error: 'O catálogo de formulários é fixo e não pode ser alterado.',
+    });
   }),
 );
 

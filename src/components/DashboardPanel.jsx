@@ -1,16 +1,6 @@
 import Icon from './Icon';
 import { buildDashboardMetrics } from '../lib/dashboard';
 
-function getInitials(name) {
-  if (!name) return 'FP';
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join('');
-}
-
 function StatusPill({ questionnaire }) {
   const status = questionnaire.status ?? 'rascunho';
 
@@ -18,17 +8,14 @@ function StatusPill({ questionnaire }) {
 }
 
 export default function DashboardPanel({
-  currentUser,
   questionnaires,
   visibleQuestionnaires,
   responses,
   selectedQuestionnaire,
   selectedQuestionnaireId,
-  onCreateQuestionnaire,
   onOpenView,
   onSelectQuestionnaire,
   onStartQuestionnaire,
-  canManageContent = true,
   activeView = 'dashboard',
   syncStatus,
   readerMode = false,
@@ -58,22 +45,13 @@ export default function DashboardPanel({
           <p>{subtitle}</p>
         </div>
 
-        <div className="workspace-actions">
-          {readerMode ? (
-            <button className="ghost-button" type="button" onClick={() => onOpenView('responder')}>
-              Ver formulários
-            </button>
-          ) : (
+        {readerMode ? null : (
+          <div className="workspace-actions">
             <button className="ghost-button" type="button" onClick={() => onOpenView('resultados')}>
               Ver respostas
             </button>
-          )}
-          {readerMode ? null : (
-            <button className="primary-button" type="button" onClick={onCreateQuestionnaire} disabled={!canManageContent}>
-              Novo formulário
-            </button>
-          )}
-        </div>
+          </div>
+        )}
       </header>
 
       {readerMode ? null : (
@@ -103,7 +81,7 @@ export default function DashboardPanel({
             <h2>Formulários</h2>
             <span>{rows.length} itens</span>
           </div>
-          {readerMode ? null : (
+          {!readerMode && (
             <button className="ghost-button" type="button" onClick={() => onOpenView('biblioteca')}>
               Abrir lista
             </button>
@@ -175,9 +153,6 @@ export default function DashboardPanel({
                           <button className="icon-button" type="button" onClick={() => onStartQuestionnaire?.(questionnaire.id)}>
                             <Icon name="runner" size={16} />
                           </button>
-                          <button className="icon-button" type="button" onClick={() => onOpenView('construtor')}>
-                            <Icon name="builder" size={16} />
-                          </button>
                         </td>
                       )}
                     </tr>
@@ -194,7 +169,7 @@ export default function DashboardPanel({
           <span className="eyebrow">Selecionado</span>
           {preview ? (
             <>
-            <strong>{preview.title}</strong>
+          <strong>{preview.title}</strong>
               <p>{preview.subtitle}</p>
             </>
           ) : (
@@ -215,9 +190,6 @@ export default function DashboardPanel({
             <>
               <button className="ghost-button" type="button" onClick={() => onOpenView('resultados')} disabled={!preview}>
                 Resultados
-              </button>
-              <button className="primary-button" type="button" onClick={onCreateQuestionnaire} disabled={!canManageContent}>
-                Criar
               </button>
             </>
           )}

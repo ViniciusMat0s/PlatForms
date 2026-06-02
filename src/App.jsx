@@ -1,56 +1,29 @@
 import { useEffect, useMemo, useState } from 'react';
 import DashboardPanel from './components/DashboardPanel';
 import LoginPanel from './components/LoginPanel';
-import QuestionnaireEditor from './components/QuestionnaireEditor';
 import QuestionnaireRunner from './components/QuestionnaireRunner';
 import ResultsPanel from './components/ResultsPanel';
 import Sidebar from './components/Sidebar';
 import { seedQuestionnaires } from './data/seed';
 import {
-  createQuestionnaire as apiCreateQuestionnaire,
   createResponse as apiCreateResponse,
   getCurrentUser,
   getState,
   login as apiLogin,
   logout as apiLogout,
-  updateQuestionnaire as apiUpdateQuestionnaire,
 } from './lib/api';
-import { createQuestionnaireId } from './lib/scoring';
 import { loadState, saveState } from './lib/storage';
 
 const QUESTIONNAIRES_KEY = 'forms-platform.questionnaires';
 const RESPONSES_KEY = 'forms-platform.responses';
+const allowedQuestionnaireIds = new Set(seedQuestionnaires.map((questionnaire) => questionnaire.id));
 
-function createBlankQuestionnaire() {
-  return {
-    id: createQuestionnaireId(`Novo questionário ${Date.now()}`),
-    title: 'Novo questionário',
-    subtitle: 'Descreva o objetivo do instrumento.',
-    audience: 'Adulto',
-    domain: 'Personalizado',
-    source: 'Rascunho local',
-    scale: {
-      id: 'likert-5',
-      labels: ['Nunca', 'Raramente', 'Às vezes', 'Frequentemente', 'Sempre'],
-      values: [0, 1, 2, 3, 4],
-    },
-    bands: [
-      { min: 0, max: 19, label: 'Muito baixo' },
-      { min: 20, max: 39, label: 'Baixo' },
-      { min: 40, max: 59, label: 'Moderado' },
-      { min: 60, max: 79, label: 'Alto' },
-      { min: 80, max: 100, label: 'Muito alto' },
-    ],
-    questions: [{ id: `q-${Date.now()}`, text: 'Digite a primeira pergunta', reverse: false }],
-  };
+function filterAllowedQuestionnaires(questionnaires = []) {
+  return questionnaires.filter((questionnaire) => allowedQuestionnaireIds.has(questionnaire.id));
 }
 
-function createQuestion() {
-  return {
-    id: `q-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    text: 'Nova pergunta',
-    reverse: false,
-  };
+function filterAllowedResponses(responses = []) {
+  return responses.filter((response) => allowedQuestionnaireIds.has(response.questionnaireId));
 }
 
 function getSelectedQuestionnaire(questionnaires, selectedQuestionnaireId) {
@@ -73,8 +46,6 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [syncStatus, setSyncStatus] = useState('Carregando');
   const [pendingFormId, setPendingFormId] = useState('');
-
-  const canManageContent = currentUser?.role === 'admin';
 
   const selectedQuestionnaire = useMemo(
     () => getSelectedQuestionnaire(questionnaires, selectedQuestionnaireId),
@@ -100,11 +71,13 @@ export default function App() {
   }, [questionnaires, searchQuery]);
 
   const applyState = (nextQuestionnaires, nextResponses) => {
-    setQuestionnaires(nextQuestionnaires);
-    setResponses(nextResponses);
-    saveState(QUESTIONNAIRES_KEY, nextQuestionnaires);
-    saveState(RESPONSES_KEY, nextResponses);
-    setSelectedQuestionnaireId((current) => current ?? nextQuestionnaires[0]?.id ?? null);
+    const sanitizedQuestionnaires = filterAllowedQuestionnaires(nextQuestionnaires);
+    const sanitizedResponses = filterAllowedResponses(nextResponses);
+    setQuestionnaires(sanitizedQuestionnaires);
+    setResponses(sanitizedResponses);
+    saveState(QUESTIONNAIRES_KEY, sanitizedQuestionnaires);
+    saveState(RESPONSES_KEY, sanitizedResponses);
+    setSelectedQuestionnaireId((current) => current ?? sanitizedQuestionnaires[0]?.id ?? null);
   };
 
   const hydrateState = async (role = currentUser?.role) => {
@@ -114,7 +87,7 @@ export default function App() {
       const nextResponses = role === 'admin' ? state.responses ?? [] : [];
       applyState(nextQuestionnaires, nextResponses);
       const formId = pendingFormId || new URLSearchParams(window.location.search).get('form') || '';
-      if (formId && nextQuestionnaires.some((item) => item.id === formId)) {
+      if (formId && filterAllowedQuestionnaires(nextQuestionnaires).some((item) => item.id === formId)) {
         setSelectedQuestionnaireId(formId);
       }
       setSyncStatus('Online');
@@ -123,7 +96,7 @@ export default function App() {
       const cachedResponses = role === 'admin' ? loadState(RESPONSES_KEY, []) : [];
       applyState(cachedQuestionnaires, cachedResponses);
       const formId = pendingFormId || new URLSearchParams(window.location.search).get('form') || '';
-      if (formId && cachedQuestionnaires.some((item) => item.id === formId)) {
+      if (formId && filterAllowedQuestionnaires(cachedQuestionnaires).some((item) => item.id === formId)) {
         setSelectedQuestionnaireId(formId);
       }
       setSyncStatus('Offline');
@@ -185,7 +158,7 @@ export default function App() {
 
     const allowedViews =
       currentUser.role === 'admin'
-        ? ['dashboard', 'biblioteca', 'construtor', 'responder', 'resultados']
+        ? ['dashboard', 'biblioteca', 'responder', 'resultados']
         : ['biblioteca', 'responder'];
 
     if (!allowedViews.includes(activeView)) {
@@ -222,84 +195,6 @@ export default function App() {
       setActiveView('dashboard');
       setSyncStatus('Desconectado');
       setAuthError('');
-    }
-  };
-
-  const persistQuestionnaire = async (questionnaireId, nextQuestionnaire) => {
-    if (!canManageContent) return;
-
-    const nextQuestionnaires = questionnaires.map((questionnaire) =>
-      questionnaire.id === questionnaireId ? nextQuestionnaire : questionnaire,
-    );
-
-    try {
-      const resolvedQuestionnaire =
-        authStatus === 'signed_in'
-          ? await apiUpdateQuestionnaire(questionnaireId, nextQuestionnaire)
-          : nextQuestionnaire;
-      const resolvedQuestionnaires = questionnaires.map((questionnaire) =>
-        questionnaire.id === questionnaireId ? resolvedQuestionnaire : questionnaire,
-      );
-      setQuestionnaires(resolvedQuestionnaires);
-      saveState(QUESTIONNAIRES_KEY, resolvedQuestionnaires);
-      setSyncStatus(authStatus === 'signed_in' ? 'Online' : 'Offline');
-    } catch {
-      setQuestionnaires(nextQuestionnaires);
-      saveState(QUESTIONNAIRES_KEY, nextQuestionnaires);
-      setSyncStatus('Offline');
-    }
-  };
-
-  const updateQuestionnaire = (questionnaireId, nextQuestionnaire) => {
-    void persistQuestionnaire(questionnaireId, nextQuestionnaire);
-  };
-
-  const addQuestion = (questionnaireId) => {
-    const nextQuestionnaires = questionnaires.map((questionnaire) =>
-      questionnaire.id === questionnaireId
-        ? { ...questionnaire, questions: [...questionnaire.questions, createQuestion()] }
-        : questionnaire,
-    );
-
-    const nextQuestionnaire = nextQuestionnaires.find((item) => item.id === questionnaireId);
-    if (nextQuestionnaire) {
-      void persistQuestionnaire(questionnaireId, nextQuestionnaire);
-    }
-  };
-
-  const removeQuestion = (questionnaireId, questionId) => {
-    const nextQuestionnaires = questionnaires.map((questionnaire) =>
-      questionnaire.id === questionnaireId
-        ? { ...questionnaire, questions: questionnaire.questions.filter((question) => question.id !== questionId) }
-        : questionnaire,
-    );
-
-    const nextQuestionnaire = nextQuestionnaires.find((item) => item.id === questionnaireId);
-    if (nextQuestionnaire) {
-      void persistQuestionnaire(questionnaireId, nextQuestionnaire);
-    }
-  };
-
-  const createQuestionnaire = async () => {
-    if (!canManageContent) return;
-
-    const draft = createBlankQuestionnaire();
-
-    try {
-      const created = authStatus === 'signed_in' ? await apiCreateQuestionnaire(draft) : draft;
-      const resolvedQuestionnaires = [created, ...questionnaires];
-      setQuestionnaires(resolvedQuestionnaires);
-      saveState(QUESTIONNAIRES_KEY, resolvedQuestionnaires);
-      setSelectedQuestionnaireId(created.id);
-      setActiveView('construtor');
-      setSyncStatus(authStatus === 'signed_in' ? 'Online' : 'Offline');
-    } catch {
-      const nextQuestionnaires = [draft, ...questionnaires];
-      setQuestionnaires(nextQuestionnaires);
-      saveState(QUESTIONNAIRES_KEY, nextQuestionnaires);
-      setSelectedQuestionnaireId(draft.id);
-      setActiveView('construtor');
-      setSyncStatus('Offline');
     }
   };
 
@@ -358,7 +253,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <Sidebar
+        <Sidebar
         activeView={activeView}
         onChangeView={setActiveView}
         onLogout={handleLogout}
@@ -379,11 +274,9 @@ export default function App() {
             responses={responses}
             selectedQuestionnaire={selectedQuestionnaire}
             selectedQuestionnaireId={selectedQuestionnaireId}
-            onCreateQuestionnaire={createQuestionnaire}
             onOpenView={setActiveView}
             onSelectQuestionnaire={setSelectedQuestionnaireId}
             onStartQuestionnaire={startQuestionnaire}
-            canManageContent={false}
             activeView={activeView}
             syncStatus={syncStatus}
             readerMode
@@ -398,24 +291,11 @@ export default function App() {
             responses={responses}
             selectedQuestionnaire={selectedQuestionnaire}
             selectedQuestionnaireId={selectedQuestionnaireId}
-            onCreateQuestionnaire={createQuestionnaire}
             onOpenView={setActiveView}
             onSelectQuestionnaire={setSelectedQuestionnaireId}
             onStartQuestionnaire={startQuestionnaire}
-            canManageContent={canManageContent}
             activeView={activeView}
             syncStatus={syncStatus}
-          />
-        )}
-
-        {currentUser?.role === 'admin' && activeView === 'construtor' && (
-          <QuestionnaireEditor
-            key={selectedQuestionnaire?.id ?? 'no-questionnaire'}
-            questionnaire={selectedQuestionnaire}
-            onUpdateQuestionnaire={updateQuestionnaire}
-            onAddQuestion={addQuestion}
-            onRemoveQuestion={removeQuestion}
-            canEdit={canManageContent}
           />
         )}
 

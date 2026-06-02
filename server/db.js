@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createQuestionnaireId } from '../src/lib/scoring.js';
 import { seedQuestionnaires } from '../src/data/seed.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -13,6 +12,9 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+const canonicalQuestionnaires = [...seedQuestionnaires];
+const canonicalQuestionnaireIds = new Set(canonicalQuestionnaires.map((questionnaire) => questionnaire.id));
+
 function normalizeRole(role) {
   if (role === 'admin' || role === 'leitor') return role;
   return null;
@@ -22,7 +24,7 @@ function createSeedDb() {
   const now = new Date().toISOString();
 
   return {
-    questionnaires: clone(seedQuestionnaires).map((questionnaire) => ({
+    questionnaires: clone(canonicalQuestionnaires).map((questionnaire) => ({
       ...questionnaire,
       metadata: {
         ...questionnaire.metadata,
@@ -51,16 +53,26 @@ function createSeedDb() {
   };
 }
 
-function mergeMissingById(existingItems, defaultItems) {
-  const map = new Map(existingItems.map((item) => [item.id, item]));
+function normalizeQuestionnaires(existingQuestionnaires = []) {
+  const existingById = new Map(existingQuestionnaires.map((item) => [item.id, item]));
 
-  for (const item of defaultItems) {
-    if (!map.has(item.id)) {
-      map.set(item.id, item);
+  return canonicalQuestionnaires.map((questionnaire) => {
+    const existing = existingById.get(questionnaire.id);
+
+    if (!existing) {
+      return questionnaire;
     }
-  }
 
-  return Array.from(map.values());
+    return {
+      ...questionnaire,
+      metadata: {
+        ...questionnaire.metadata,
+        ...(existing.metadata ?? {}),
+        createdAt: existing.metadata?.createdAt ?? questionnaire.metadata?.createdAt,
+        updatedAt: existing.metadata?.updatedAt ?? questionnaire.metadata?.updatedAt,
+      },
+    };
+  });
 }
 
 function mergeUsers(existingUsers, defaultUsers) {
@@ -85,9 +97,11 @@ function mergeUsers(existingUsers, defaultUsers) {
 
 function normalizeDatabase(db) {
   const seed = createSeedDb();
-  const questionnaires = mergeMissingById(db.questionnaires ?? [], seed.questionnaires);
+  const questionnaires = normalizeQuestionnaires(db.questionnaires ?? seed.questionnaires);
   const users = mergeUsers(db.users ?? [], seed.users);
-  const responses = Array.isArray(db.responses) ? db.responses : [];
+  const responses = Array.isArray(db.responses)
+    ? db.responses.filter((response) => canonicalQuestionnaireIds.has(response.questionnaireId))
+    : [];
   const userIds = new Set(users.map((user) => user.id));
   const sessions = Array.isArray(db.sessions) ? db.sessions.filter((session) => userIds.has(session.userId)) : [];
 
@@ -125,32 +139,4 @@ export async function readDatabase() {
 export async function writeDatabase(db) {
   await ensureDatabase();
   await fs.writeFile(DB_PATH, JSON.stringify(db, null, 2), 'utf8');
-}
-
-export function createQuestionnaireFromInput(input) {
-  const now = new Date().toISOString();
-  const title = input.title ?? 'Novo questionário';
-
-  return {
-    id: input.id ?? createQuestionnaireId(title),
-    code: input.code ?? input.id ?? createQuestionnaireId(title),
-    title,
-    subtitle: input.subtitle ?? '',
-    audience: input.audience ?? 'Geral',
-    domain: input.domain ?? 'Geral',
-    source: input.source ?? 'API',
-    version: input.version ?? 1,
-    status: input.status ?? 'draft',
-    tags: Array.isArray(input.tags) ? input.tags : [],
-    scale: input.scale,
-    bands: Array.isArray(input.bands) ? input.bands : [],
-    scoring: input.scoring ?? { type: 'mean_scaled', reverseQuestions: [] },
-    consent: input.consent ?? { required: false, text: '' },
-    sections: Array.isArray(input.sections) ? input.sections : [],
-    questions: Array.isArray(input.questions) ? input.questions : [],
-    metadata: {
-      createdAt: input.metadata?.createdAt ?? now,
-      updatedAt: now,
-    },
-  };
 }

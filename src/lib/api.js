@@ -59,24 +59,6 @@ export async function getQuestionnaires() {
   return request('/questionnaires');
 }
 
-export async function createQuestionnaire(questionnaire) {
-  return request('/questionnaires', {
-    method: 'POST',
-    body: JSON.stringify(questionnaire),
-  });
-}
-
-export async function updateQuestionnaire(questionnaireId, questionnaire) {
-  return request(`/questionnaires/${questionnaireId}`, {
-    method: 'PUT',
-    body: JSON.stringify(questionnaire),
-  });
-}
-
-export async function deleteQuestionnaire(questionnaireId) {
-  return request(`/questionnaires/${questionnaireId}`, { method: 'DELETE' });
-}
-
 export async function createResponse(response) {
   return request('/responses', {
     method: 'POST',
