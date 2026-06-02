@@ -11,141 +11,170 @@ function getInitials(name) {
     .join('');
 }
 
-function MetricCard({ label, value, hint, icon = 'spark' }) {
-  return (
-    <article className="metric-card">
-      <div className="metric-card-icon">
-        <Icon name={icon} size={18} />
-      </div>
-      <div>
-        <span>{label}</span>
-        <strong>{value}</strong>
-        {hint ? <small>{hint}</small> : null}
-      </div>
-    </article>
-  );
+function StatusPill({ questionnaire }) {
+  const status = questionnaire.status ?? 'rascunho';
+
+  return <span className={`table-pill status-${status}`}>{status}</span>;
 }
 
 export default function DashboardPanel({
   currentUser,
   questionnaires,
+  visibleQuestionnaires,
   responses,
   selectedQuestionnaire,
   selectedQuestionnaireId,
   onCreateQuestionnaire,
   onOpenView,
+  onSelectQuestionnaire,
   canManageContent = true,
+  activeView = 'dashboard',
+  syncStatus,
 }) {
   const metrics = buildDashboardMetrics(questionnaires, responses);
+  const rows = visibleQuestionnaires ?? questionnaires;
   const preview =
-    metrics.summaries.find((summary) => summary.id === selectedQuestionnaireId) ??
+    rows.find((item) => item.id === selectedQuestionnaireId) ??
     selectedQuestionnaire ??
-    metrics.summaries[0] ??
+    rows[0] ??
     null;
 
+  const title = activeView === 'biblioteca' ? 'Formularios' : 'Visao geral';
+  const subtitle =
+    activeView === 'biblioteca'
+      ? 'Veja os formularios cadastrados, abra um modelo e envie para outras pessoas.'
+      : 'Crie formularios, envie rapidamente e acompanhe as respostas em uma tela simples.';
+
   return (
-    <section className="dashboard-page">
-      <header className="dashboard-topbar">
-        <div className="dashboard-intro">
-          <span className="eyebrow">Olá, {currentUser?.name?.split(' ')?.[0] ?? 'usuário'}!</span>
-          <h1>Um lugar para criar e acompanhar</h1>
-          <p>Abra um formulário, envie para as pessoas e veja as respostas em um único fluxo.</p>
+    <section className="workspace-page">
+      <header className="workspace-header">
+        <div>
+          <span className="eyebrow">Workspace</span>
+          <h1>{title}</h1>
+          <p>{subtitle}</p>
         </div>
 
-        <div className="profile-chip">
-          <span className="profile-avatar">{getInitials(currentUser?.name)}</span>
-          <div>
-            <strong>{currentUser?.name ?? 'Sem nome'}</strong>
-            <span>{currentUser?.role ?? 'admin'}</span>
-          </div>
+        <div className="workspace-actions">
+          <button className="ghost-button" type="button" onClick={() => onOpenView('resultados')}>
+            Ver respostas
+          </button>
+          <button className="primary-button" type="button" onClick={onCreateQuestionnaire} disabled={!canManageContent}>
+            Novo formulario
+          </button>
         </div>
       </header>
 
-      <div className="dashboard-slim-grid">
-        <article className="dashboard-card dashboard-hero">
-          <div className="card-heading">
-            <div>
-              <span className="eyebrow">Atalho principal</span>
-              <h2>Comece por aqui</h2>
-            </div>
+      <div className="workspace-summary">
+        <div className="summary-chip">
+          <span>Formularios</span>
+          <strong>{metrics.counts.total}</strong>
+        </div>
+        <div className="summary-chip">
+          <span>Respostas</span>
+          <strong>{metrics.counts.responses}</strong>
+        </div>
+        <div className="summary-chip">
+          <span>Media</span>
+          <strong>{metrics.averageScore.toFixed(1)}</strong>
+        </div>
+        <div className="summary-chip muted">
+          <span>Status</span>
+          <strong>{syncStatus ?? 'Online'}</strong>
+        </div>
+      </div>
+
+      <div className="table-shell">
+        <div className="table-shell-header">
+          <div className="table-shell-title">
+            <h2>Formularios</h2>
+            <span>{rows.length} itens</span>
           </div>
+          <button className="ghost-button" type="button" onClick={() => onOpenView('biblioteca')}>
+            Abrir lista
+          </button>
+        </div>
 
-          <p className="dashboard-hero-copy">
-            Crie um formulário, envie o link e acompanhe as respostas sem navegar por telas desnecessárias.
-          </p>
-
-          <div className="hero-actions">
-            <button className="primary-button" type="button" onClick={onCreateQuestionnaire} disabled={!canManageContent}>
-              Novo formulário
-            </button>
-            <button className="ghost-button" type="button" onClick={() => onOpenView('biblioteca')}>
-              Abrir biblioteca
-            </button>
-            <button className="ghost-button" type="button" onClick={() => onOpenView('resultados')}>
-              Ver respostas
-            </button>
-          </div>
-
-          <div className="hero-metrics">
-            <MetricCard label="Formulários" value={metrics.counts.total} hint="Modelos prontos" icon="library" />
-            <MetricCard label="Respostas" value={metrics.counts.responses} hint="Envios recebidos" icon="users" />
-            <MetricCard label="Média" value={metrics.averageScore.toFixed(1)} hint="Pontuação geral" icon="spark" />
-          </div>
-        </article>
-
-        <aside className="dashboard-rail">
-          <article className="dashboard-card dashboard-compact">
-            <div className="card-heading">
-              <div>
-                <span className="eyebrow">Visão rápida</span>
-                <h2>Último formulário</h2>
-              </div>
-            </div>
-
-            {preview ? (
-              <div className="dashboard-mini-copy">
-                <strong>{preview.title}</strong>
-                <p>{preview.subtitle}</p>
-                <div className="preview-meta">
-                  <span>{preview.domain}</span>
-                  <span>{preview.audience}</span>
-                </div>
-              </div>
-            ) : (
-              <div className="empty-state small">Nenhum formulário selecionado.</div>
-            )}
-          </article>
-
-          <article className="dashboard-card dashboard-compact">
-            <div className="card-heading">
-              <div>
-                <span className="eyebrow">Resumo</span>
-                <h2>Uso recente</h2>
-              </div>
-            </div>
-
-            <div className="simple-list">
-              {metrics.summaries.length === 0 ? (
-                <div className="empty-state small">Ainda não há formulários cadastrados.</div>
+        <div className="table-scroll">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Formulario</th>
+                <th>Status</th>
+                <th>Perguntas</th>
+                <th>Respostas</th>
+                <th>Media</th>
+                <th>Publico</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {rows.length === 0 ? (
+                <tr>
+                  <td colSpan={7}>
+                    <div className="empty-state small">Nenhum formulario encontrado.</div>
+                  </td>
+                </tr>
               ) : (
-                metrics.summaries.slice(0, 3).map((summary) => (
-                  <button
-                    key={summary.id}
-                    type="button"
-                    className="simple-list-item"
-                    onClick={() => onOpenView('biblioteca')}
-                  >
-                    <div>
-                      <strong>{summary.title}</strong>
-                      <span>{summary.relatedCount} respostas</span>
-                    </div>
-                    <span>{summary.latestBand}</span>
-                  </button>
-                ))
+                rows.map((questionnaire) => {
+                  const summary = metrics.summaries.find((item) => item.id === questionnaire.id);
+                  return (
+                    <tr
+                      key={questionnaire.id}
+                      className={questionnaire.id === selectedQuestionnaireId ? 'selected' : ''}
+                      onClick={() => onSelectQuestionnaire(questionnaire.id)}
+                    >
+                      <td>
+                        <strong>{questionnaire.title}</strong>
+                        <span>{questionnaire.domain}</span>
+                      </td>
+                      <td>
+                        <StatusPill questionnaire={questionnaire} />
+                      </td>
+                      <td>{questionnaire.questions.length}</td>
+                      <td>{summary?.relatedCount ?? 0}</td>
+                      <td>{summary?.averageScore ?? '0.0'}</td>
+                      <td>{questionnaire.audience}</td>
+                      <td className="table-actions">
+                        <button className="icon-button" type="button" onClick={() => onOpenView('responder')}>
+                          <Icon name="runner" size={16} />
+                        </button>
+                        <button className="icon-button" type="button" onClick={() => onOpenView('construtor')}>
+                          <Icon name="builder" size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
-            </div>
-          </article>
-        </aside>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="workspace-footer">
+        <div className="workspace-preview">
+          <span className="eyebrow">Selecionado</span>
+          {preview ? (
+            <>
+              <strong>{preview.title}</strong>
+              <p>{preview.subtitle}</p>
+            </>
+          ) : (
+            <p>Nenhum formulario selecionado.</p>
+          )}
+        </div>
+
+        <div className="workspace-footer-actions">
+          <button className="ghost-button" type="button" onClick={() => onOpenView('responder')} disabled={!preview}>
+            Responder
+          </button>
+          <button className="ghost-button" type="button" onClick={() => onOpenView('resultados')} disabled={!preview}>
+            Resultados
+          </button>
+          <button className="primary-button" type="button" onClick={onCreateQuestionnaire} disabled={!canManageContent}>
+            Criar
+          </button>
+        </div>
       </div>
     </section>
   );

@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import DashboardPanel from './components/DashboardPanel';
 import LoginPanel from './components/LoginPanel';
-import QuestionnaireCard from './components/QuestionnaireCard';
 import QuestionnaireEditor from './components/QuestionnaireEditor';
-import QuestionnaireFilters from './components/QuestionnaireFilters';
 import QuestionnaireRunner from './components/QuestionnaireRunner';
 import ResultsPanel from './components/ResultsPanel';
 import Sidebar from './components/Sidebar';
@@ -25,15 +23,15 @@ const RESPONSES_KEY = 'forms-platform.responses';
 
 function createBlankQuestionnaire() {
   return {
-    id: createQuestionnaireId(`Novo questionário ${Date.now()}`),
-    title: 'Novo questionário',
+    id: createQuestionnaireId(`Novo questionario ${Date.now()}`),
+    title: 'Novo questionario',
     subtitle: 'Descreva o objetivo do instrumento.',
     audience: 'Adulto',
     domain: 'Personalizado',
     source: 'Rascunho local',
     scale: {
       id: 'likert-5',
-      labels: ['Nunca', 'Raramente', 'Às vezes', 'Frequentemente', 'Sempre'],
+      labels: ['Nunca', 'Raramente', 'As vezes', 'Frequentemente', 'Sempre'],
       values: [0, 1, 2, 3, 4],
     },
     bands: [
@@ -55,6 +53,10 @@ function createQuestion() {
   };
 }
 
+function getSelectedQuestionnaire(questionnaires, selectedQuestionnaireId) {
+  return questionnaires.find((item) => item.id === selectedQuestionnaireId) ?? questionnaires[0] ?? null;
+}
+
 export default function App() {
   const [authStatus, setAuthStatus] = useState('checking');
   const [authLoading, setAuthLoading] = useState(false);
@@ -64,65 +66,34 @@ export default function App() {
   const [responses, setResponses] = useState([]);
   const [activeView, setActiveView] = useState('dashboard');
   const [selectedQuestionnaireId, setSelectedQuestionnaireId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [syncStatus, setSyncStatus] = useState('Carregando');
-  const [questionnaireQuery, setQuestionnaireQuery] = useState('');
-  const [questionnaireDomain, setQuestionnaireDomain] = useState('all');
-  const [questionnaireStatus, setQuestionnaireStatus] = useState('all');
+  const [pendingFormId, setPendingFormId] = useState('');
+
   const canManageContent = currentUser?.role === 'admin' || currentUser?.role === 'editor';
 
   const selectedQuestionnaire = useMemo(
-    () => questionnaires.find((item) => item.id === selectedQuestionnaireId) ?? questionnaires[0] ?? null,
+    () => getSelectedQuestionnaire(questionnaires, selectedQuestionnaireId),
     [questionnaires, selectedQuestionnaireId],
   );
 
-  const questionnaireDomains = useMemo(() => {
-    return Array.from(new Set(questionnaires.map((questionnaire) => questionnaire.domain).filter(Boolean))).sort(
-      (a, b) => a.localeCompare(b),
+  const visibleQuestionnaires = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return questionnaires;
+
+    return questionnaires.filter((questionnaire) =>
+      [
+        questionnaire.title,
+        questionnaire.subtitle,
+        questionnaire.domain,
+        questionnaire.audience,
+        questionnaire.source,
+        ...(questionnaire.questions ?? []).map((question) => question.text),
+      ]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(query)),
     );
-  }, [questionnaires]);
-
-  const filteredQuestionnaires = useMemo(() => {
-    const query = questionnaireQuery.trim().toLowerCase();
-
-    return questionnaires.filter((questionnaire) => {
-      const matchesQuery =
-        query.length === 0 ||
-        [
-          questionnaire.title,
-          questionnaire.subtitle,
-          questionnaire.domain,
-          questionnaire.code,
-          questionnaire.audience,
-          ...(questionnaire.tags ?? []),
-          ...(questionnaire.questions ?? []).map((question) => question.text),
-        ]
-          .filter(Boolean)
-          .some((value) => String(value).toLowerCase().includes(query));
-
-      const matchesDomain = questionnaireDomain === 'all' || questionnaire.domain === questionnaireDomain;
-      const matchesStatus = questionnaireStatus === 'all' || questionnaire.status === questionnaireStatus;
-
-      return matchesQuery && matchesDomain && matchesStatus;
-    });
-  }, [questionnaires, questionnaireQuery, questionnaireDomain, questionnaireStatus]);
-
-  const updateFilters = (next) => {
-    if (Object.prototype.hasOwnProperty.call(next, 'query')) {
-      setQuestionnaireQuery(next.query);
-    }
-    if (Object.prototype.hasOwnProperty.call(next, 'domain')) {
-      setQuestionnaireDomain(next.domain);
-    }
-    if (Object.prototype.hasOwnProperty.call(next, 'status')) {
-      setQuestionnaireStatus(next.status);
-    }
-  };
-
-  const clearFilters = () => {
-    setQuestionnaireQuery('');
-    setQuestionnaireDomain('all');
-    setQuestionnaireStatus('all');
-  };
+  }, [questionnaires, searchQuery]);
 
   const applyState = (nextQuestionnaires, nextResponses) => {
     setQuestionnaires(nextQuestionnaires);
@@ -138,11 +109,19 @@ export default function App() {
       const nextQuestionnaires = state.questionnaires?.length ? state.questionnaires : seedQuestionnaires;
       const nextResponses = state.responses ?? [];
       applyState(nextQuestionnaires, nextResponses);
+      const formId = pendingFormId || new URLSearchParams(window.location.search).get('form') || '';
+      if (formId && nextQuestionnaires.some((item) => item.id === formId)) {
+        setSelectedQuestionnaireId(formId);
+      }
       setSyncStatus('Online');
     } catch {
       const cachedQuestionnaires = loadState(QUESTIONNAIRES_KEY, seedQuestionnaires);
       const cachedResponses = loadState(RESPONSES_KEY, []);
       applyState(cachedQuestionnaires, cachedResponses);
+      const formId = pendingFormId || new URLSearchParams(window.location.search).get('form') || '';
+      if (formId && cachedQuestionnaires.some((item) => item.id === formId)) {
+        setSelectedQuestionnaireId(formId);
+      }
       setSyncStatus('Offline');
     }
   };
@@ -151,6 +130,10 @@ export default function App() {
     let mounted = true;
 
     async function bootstrap() {
+      const search = new URLSearchParams(window.location.search);
+      const formId = search.get('form') || '';
+      if (formId) setPendingFormId(formId);
+
       const token = window.localStorage.getItem('forms-platform.token');
       if (!token) {
         if (!mounted) return;
@@ -338,7 +321,7 @@ export default function App() {
         <div className="login-card">
           <span className="eyebrow">Carregando</span>
           <h1>Preparando o ambiente</h1>
-          <p>Estamos verificando sua sessão e carregando os dados da plataforma.</p>
+          <p>Estamos verificando sua sessao e carregando os dados da plataforma.</p>
         </div>
       </section>
     );
@@ -355,100 +338,29 @@ export default function App() {
         onChangeView={setActiveView}
         onLogout={handleLogout}
         currentUser={currentUser}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        questionnaires={questionnaires}
+        selectedQuestionnaireId={selectedQuestionnaireId}
+        onSelectQuestionnaire={setSelectedQuestionnaireId}
       />
 
       <main className="main-content">
-        {activeView === 'dashboard' && (
+        {(activeView === 'dashboard' || activeView === 'biblioteca') && (
           <DashboardPanel
             currentUser={currentUser}
             questionnaires={questionnaires}
+            visibleQuestionnaires={visibleQuestionnaires}
             responses={responses}
             selectedQuestionnaire={selectedQuestionnaire}
             selectedQuestionnaireId={selectedQuestionnaireId}
             onCreateQuestionnaire={createQuestionnaire}
             onOpenView={setActiveView}
+            onSelectQuestionnaire={setSelectedQuestionnaireId}
             canManageContent={canManageContent}
+            activeView={activeView}
+            syncStatus={syncStatus}
           />
-        )}
-
-        {activeView === 'biblioteca' && (
-          <section className="library-layout">
-            <article className="panel library-panel">
-              <div className="panel-header">
-                <div>
-                  <span className="eyebrow">Biblioteca</span>
-                  <h2>Modelos disponíveis</h2>
-                </div>
-                <button
-                  className="primary-button"
-                  onClick={createQuestionnaire}
-                  type="button"
-                  disabled={!canManageContent}
-                  title={canManageContent ? 'Criar modelo' : 'Seu perfil não permite criar modelos'}
-                >
-                  Novo formulário
-                </button>
-              </div>
-
-              <QuestionnaireFilters
-                query={questionnaireQuery}
-                domain={questionnaireDomain}
-                status={questionnaireStatus}
-                domains={questionnaireDomains}
-                onChange={updateFilters}
-                onClear={clearFilters}
-              />
-
-              <div className="simple-list">
-                {filteredQuestionnaires.length === 0 ? (
-                  <div className="empty-state">Nenhum questionário encontrado.</div>
-                ) : (
-                  filteredQuestionnaires.map((questionnaire) => (
-                    <QuestionnaireCard
-                      key={questionnaire.id}
-                      questionnaire={questionnaire}
-                      isSelected={questionnaire.id === selectedQuestionnaireId}
-                      onSelect={setSelectedQuestionnaireId}
-                    />
-                  ))
-                )}
-              </div>
-            </article>
-
-            <article className="panel library-detail-panel">
-              <div className="panel-header">
-                <div>
-                  <span className="eyebrow">Detalhe</span>
-                  <h2>{selectedQuestionnaire?.title ?? 'Selecione um modelo'}</h2>
-                </div>
-                <span className="status-chip">{selectedQuestionnaire?.status ?? 'draft'}</span>
-              </div>
-
-              {selectedQuestionnaire ? (
-                <div className="library-detail">
-                  <p>{selectedQuestionnaire.subtitle}</p>
-                  <div className="preview-meta">
-                    <span>{selectedQuestionnaire.domain}</span>
-                    <span>{selectedQuestionnaire.audience}</span>
-                    <span>{selectedQuestionnaire.questions.length} perguntas</span>
-                  </div>
-                  <div className="library-detail-actions">
-                    <button className="primary-button" type="button" onClick={() => setActiveView('responder')}>
-                      Responder
-                    </button>
-                    <button className="ghost-button" type="button" onClick={() => setActiveView('construtor')}>
-                      Editar
-                    </button>
-                    <button className="ghost-button" type="button" onClick={() => setActiveView('resultados')}>
-                      Resultados
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="empty-state">Escolha um questionário para ver os detalhes aqui.</div>
-              )}
-            </article>
-          </section>
         )}
 
         {activeView === 'construtor' && (
