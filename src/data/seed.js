@@ -31,6 +31,11 @@ const selfEsteemScale = createScale({
   labels: ['1', '2', '3', '4'],
 });
 
+const engagementScale = createScale({
+  id: 'engagement-5',
+  labels: ['1', '2', '3', '4', '5'],
+});
+
 const burnoutScale = createScale({
   id: 'burnout-5',
   labels: ['Nunca', 'Raramente', 'Às Vezes', 'Frequentemente', 'Sempre'],
@@ -224,6 +229,31 @@ export const seedQuestionnaires = [
       q('pv-8', 'Não me dou o devido valor. Gostaria de ter mais respeito por mim.', true),
       q('pv-9', 'Quase sempre estou inclinado(a) a achar que sou um fracasso.', true),
       q('pv-10', 'Eu tenho uma atitude positiva (sentimentos, ações) em relação a mim mesmo(a)'),
+    ],
+  }),
+  createQuestionnaire({
+    id: createQuestionnaireId('Quão engajado(a) sou no meu trabalho?'),
+    code: 'quao-engajado-sou-no-meu-trabalho',
+    title: 'Quão engajado(a) sou no meu trabalho?',
+    subtitle: 'Avalia energia, dedicação e absorção no trabalho.',
+    audience: 'Adulto',
+    domain: 'Trabalho e bem-estar',
+    source: 'Documento enviado pelo usuário',
+    status: 'active',
+    tags: ['engajamento', 'trabalho'],
+    scale: engagementScale,
+    bands: defaultBands,
+    scoring: { type: 'mean_scaled', reverseQuestions: [] },
+    questions: [
+      q('en-1', 'Sinto-me energizado no meu trabalho', false, 'vigor'),
+      q('en-2', 'Sinto-me forte e vigoroso no meu trabalho', false, 'vigor'),
+      q('en-3', 'Sou entusiasmado com meu trabalho', false, 'dedicacao'),
+      q('en-4', 'Meu trabalho me inspira', false, 'dedicacao'),
+      q('en-5', 'Tenho vontade de ir para o trabalho quando levanto de manhã', false, 'vigor'),
+      q('en-6', 'Sinto-me feliz quando estou trabalhando intensamente', false, 'absorcao'),
+      q('en-7', 'Tenho orgulho do Trabalho que realizo', false, 'dedicacao'),
+      q('en-8', 'Eu fico imerso no meu trabalho', false, 'absorcao'),
+      q('en-9', 'Não vejo o tempo passar quando estou trabalhando', false, 'absorcao'),
     ],
   }),
   createQuestionnaire({
