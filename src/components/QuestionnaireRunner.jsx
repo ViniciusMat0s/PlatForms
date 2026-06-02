@@ -11,12 +11,14 @@ export default function QuestionnaireRunner({
   const [sector, setSector] = useState(initialSector);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   useEffect(() => {
     setRespondentName(initialRespondentName);
     setSector(initialSector);
     setAnswers({});
     setSubmitted(false);
+    setSubmitError('');
   }, [questionnaire?.id, initialRespondentName, initialSector]);
 
   const result = useMemo(
@@ -36,22 +38,35 @@ export default function QuestionnaireRunner({
     [answers, questionnaire],
   );
 
+  const isComplete = result.total > 0 && result.answered === result.total;
+  const canSubmit = Boolean(respondentName.trim()) && Boolean(sector.trim()) && isComplete;
+
   if (!questionnaire) {
     return <div className="empty-state">Escolha um formulário para responder.</div>;
   }
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    await onSubmit({
-      questionnaireId: questionnaire.id,
-      respondentName,
-      sector,
-      notes: '',
-      answers,
-      score: result.score,
-      band: result.band,
-    });
-    setSubmitted(true);
+    if (!canSubmit) {
+      setSubmitError('Preencha nome, setor e todas as perguntas antes de enviar.');
+      return;
+    }
+
+    try {
+      await onSubmit({
+        questionnaireId: questionnaire.id,
+        respondentName,
+        sector,
+        notes: '',
+        answers,
+        score: result.score,
+        band: result.band,
+      });
+      setSubmitted(true);
+      setSubmitError('');
+    } catch (error) {
+      setSubmitError(error?.message || 'Não foi possível enviar a resposta agora.');
+    }
   };
 
   const setAnswer = (questionId, value) => {
@@ -120,10 +135,12 @@ export default function QuestionnaireRunner({
       </div>
 
       <div className="actions-row">
-        <button className="primary-button" type="submit">
+        <button className="primary-button" type="submit" disabled={!canSubmit}>
           Salvar resposta
         </button>
-        <span className="hint">{submitted ? 'Resposta salva.' : 'Você pode salvar quando terminar.'}</span>
+        <span className="hint">
+          {submitError || (submitted ? 'Resposta salva.' : 'Preencha tudo para enviar.')}
+        </span>
       </div>
     </form>
   );

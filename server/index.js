@@ -168,17 +168,31 @@ app.get(
 );
 
 app.post('/api/responses', async (req, res) => {
-    const payload = req.body ?? {};
-    const db = await readDatabase();
-    const questionnaireExists = db.questionnaires.some((item) => item.id === payload.questionnaireId);
+  const payload = req.body ?? {};
+  const db = await readDatabase();
+  const questionnaire = db.questionnaires.find((item) => item.id === payload.questionnaireId) ?? null;
 
-    if (!questionnaireExists) {
-      return res.status(404).json({ error: 'Questionário não encontrado.' });
-    }
+  if (!questionnaire) {
+    return res.status(404).json({ error: 'Questionário não encontrado.' });
+  }
 
-    const auth = await findSession(req);
-    const response = {
-      id: `resp-${crypto.randomUUID()}`,
+  const answers = payload.answers ?? {};
+  const isComplete =
+    Array.isArray(questionnaire.questions) &&
+    questionnaire.questions.length > 0 &&
+    questionnaire.questions.every(
+      (question) =>
+        Object.prototype.hasOwnProperty.call(answers, question.id) &&
+        typeof answers[question.id] === 'number',
+    );
+
+  if (!isComplete) {
+    return res.status(400).json({ error: 'Preencha todas as perguntas antes de enviar.' });
+  }
+
+  const auth = await findSession(req);
+  const response = {
+    id: `resp-${crypto.randomUUID()}`,
       createdAt: new Date().toISOString(),
       submittedByUserId: auth?.user?.id ?? null,
       submittedByRole: auth?.user?.role ?? 'public',

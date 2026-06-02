@@ -235,6 +235,22 @@ export default function App() {
   };
 
   const handleResponseSubmit = async (payload) => {
+    const questionnaire = questionnaires.find((item) => item.id === payload.questionnaireId) ?? null;
+    const answers = payload.answers ?? {};
+    const isComplete =
+      questionnaire?.questions?.length > 0 &&
+      questionnaire.questions.every(
+        (question) =>
+          Object.prototype.hasOwnProperty.call(answers, question.id) &&
+          typeof answers[question.id] === 'number',
+      );
+
+    if (!isComplete) {
+      const error = new Error('Preencha todas as perguntas antes de enviar.');
+      error.status = 400;
+      throw error;
+    }
+
     try {
       const created = await apiCreateResponse(payload);
 
@@ -243,7 +259,10 @@ export default function App() {
       saveState(RESPONSES_KEY, next);
       setActiveView(currentUser?.role === 'admin' ? 'resultados' : 'biblioteca');
       setSyncStatus('Online');
-    } catch {
+    } catch (error) {
+      if (error?.status === 400 || error?.status === 422) {
+        throw error;
+      }
       const fallback = {
         id: `resp-${Date.now()}`,
         createdAt: new Date().toISOString(),
