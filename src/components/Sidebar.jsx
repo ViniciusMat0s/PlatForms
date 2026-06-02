@@ -59,11 +59,11 @@ export default function Sidebar({ activeView, onChangeView, currentUser, onLogou
 
       <div className="sidebar-footer">
         <div className="profile-panel">
-          <span className="profile-avatar">{getInitials(currentUser?.name)}</span>
-          <div>
+          <div className="profile-copy">
             <strong>{currentUser ? currentUser.name : 'Sem sessão'}</strong>
             <span>{roleLabel}</span>
           </div>
+          <span className="profile-avatar">{getInitials(currentUser?.name)}</span>
         </div>
 
         <button className="ghost-button logout-button" onClick={onLogout} type="button">
