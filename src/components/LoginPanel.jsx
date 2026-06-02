@@ -1,8 +1,8 @@
 import { useState } from 'react';
 
 export default function LoginPanel({ onLogin, onPublicAccess, loading, error }) {
-  const [email, setEmail] = useState('admin@local');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('ronice');
+  const [password, setPassword] = useState('roniceadmin');
   const [name, setName] = useState('');
   const [sector, setSector] = useState('');
 
@@ -26,7 +26,7 @@ export default function LoginPanel({ onLogin, onPublicAccess, loading, error }) 
 
           <form className="login-form" onSubmit={handleAdminSubmit}>
             <label className="field">
-              <span>E-mail</span>
+              <span>Login</span>
               <input required value={email} onChange={(event) => setEmail(event.target.value)} />
             </label>
             <label className="field">
@@ -69,7 +69,7 @@ export default function LoginPanel({ onLogin, onPublicAccess, loading, error }) 
 
           <div className="login-hint">
             <strong>Administrador de teste</strong>
-            <span>admin@local / admin123</span>
+            <span>ronice / roniceadmin</span>
           </div>
         </article>
       </div>

@@ -36,9 +36,9 @@ function createSeedDb() {
     users: [
       {
         id: 'user-admin',
-        name: 'Administrador',
-        email: 'admin@local',
-        password: 'admin123',
+        name: 'Ronice',
+        email: 'ronice',
+        password: 'roniceadmin',
         role: 'admin',
       },
     ],
@@ -78,6 +78,19 @@ function mergeUsers(existingUsers, defaultUsers) {
   for (const user of existingUsers) {
     const normalizedRole = normalizeRole(user.role);
     if (!normalizedRole) continue;
+
+    if (user.id === 'user-admin') {
+      map.set(user.id, {
+        ...defaultUsers.find((item) => item.id === user.id),
+        ...user,
+        id: 'user-admin',
+        name: 'Ronice',
+        email: 'ronice',
+        password: 'roniceadmin',
+        role: 'admin',
+      });
+      continue;
+    }
 
     map.set(user.id, {
       ...user,
